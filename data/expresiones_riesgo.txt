@@ -1,0 +1,3 @@
+# Expresiones que activan la respuesta de crisis (RF-23).
+# Una expresión por línea. Las define y aprueba la especialista.
+# PENDIENTE: este archivo está vacío a propósito hasta recibir la lista aprobada.

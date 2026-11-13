@@ -1,0 +1,44 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# --- Entornos virtuales ---
+.venv/
+venv/
+env/
+
+# --- Variables de entorno y claves (nunca se suben) ---
+.env
+.env.*
+!.env.example
+
+# --- Pruebas, cobertura y análisis ---
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- Bases de datos locales e índices de búsqueda ---
+*.db
+*.sqlite
+*.sqlite3
+chroma/
+.chroma/
+
+# --- Material sin aprobar y datos locales ---
+data/material/privado/
+
+# --- Editores y sistema operativo ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Registros ---
+*.log

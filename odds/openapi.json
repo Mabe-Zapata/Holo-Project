@@ -1,0 +1,557 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Holo API",
+    "description": "API del proyecto Holo. Versión de demostración: usa cuentas ficticias y almacenamiento en memoria.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/salud": {
+      "get": {
+        "tags": [
+          "salud"
+        ],
+        "summary": "Comprueba que la API está en funcionamiento",
+        "operationId": "salud_salud_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Salud Salud Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/consentimiento": {
+      "post": {
+        "tags": [
+          "consentimiento"
+        ],
+        "summary": "Registra el consentimiento informado (RF-02)",
+        "operationId": "registrar_consentimiento_consentimiento_post",
+        "parameters": [
+          {
+            "name": "x-usuario-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Identificador de la cuenta de demostración: ana, luis o tratante.",
+              "title": "X-Usuario-Id"
+            },
+            "description": "Identificador de la cuenta de demostración: ana, luis o tratante."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentimientoEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentimientoSalida"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Envía un mensaje al asistente (RF-07, RF-23, RF-24)",
+        "operationId": "enviar_mensaje_chat_post",
+        "parameters": [
+          {
+            "name": "x-usuario-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Identificador de la cuenta de demostración: ana, luis o tratante.",
+              "title": "X-Usuario-Id"
+            },
+            "description": "Identificador de la cuenta de demostración: ana, luis o tratante."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MensajeEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MensajeSalida"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat/historial": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Devuelve los mensajes anteriores del usuario (RF-07)",
+        "operationId": "historial_chat_historial_get",
+        "parameters": [
+          {
+            "name": "x-usuario-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Identificador de la cuenta de demostración: ana, luis o tratante.",
+              "title": "X-Usuario-Id"
+            },
+            "description": "Identificador de la cuenta de demostración: ana, luis o tratante."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MensajeHistorial"
+                  },
+                  "title": "Response Historial Chat Historial Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resumen": {
+      "post": {
+        "tags": [
+          "resumen"
+        ],
+        "summary": "Genera el resumen de los últimos siete días (RF-19)",
+        "operationId": "generar_resumen_resumen_post",
+        "parameters": [
+          {
+            "name": "x-usuario-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Identificador de la cuenta de demostración: ana, luis o tratante.",
+              "title": "X-Usuario-Id"
+            },
+            "description": "Identificador de la cuenta de demostración: ana, luis o tratante."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Generar Resumen Resumen Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tratante/paciente": {
+      "get": {
+        "tags": [
+          "tratante"
+        ],
+        "summary": "Devuelve las alertas y el último resumen del paciente vinculado (RF-25, RF-30)",
+        "operationId": "vista_paciente_tratante_paciente_get",
+        "parameters": [
+          {
+            "name": "x-usuario-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Identificador de la cuenta de demostración: ana, luis o tratante.",
+              "title": "X-Usuario-Id"
+            },
+            "description": "Identificador de la cuenta de demostración: ana, luis o tratante."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VistaPaciente"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Alerta": {
+        "properties": {
+          "nivel": {
+            "type": "string",
+            "title": "Nivel"
+          },
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nivel",
+          "mensaje",
+          "fecha"
+        ],
+        "title": "Alerta"
+      },
+      "ConsentimientoEntrada": {
+        "properties": {
+          "mayor_de_edad": {
+            "type": "boolean",
+            "title": "Mayor De Edad"
+          },
+          "acepta": {
+            "type": "boolean",
+            "title": "Acepta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mayor_de_edad",
+          "acepta"
+        ],
+        "title": "ConsentimientoEntrada"
+      },
+      "ConsentimientoSalida": {
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "title": "Usuario Id"
+          },
+          "aceptado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Aceptado En"
+          }
+        },
+        "type": "object",
+        "required": [
+          "usuario_id",
+          "aceptado_en"
+        ],
+        "title": "ConsentimientoSalida"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MensajeEntrada": {
+        "properties": {
+          "texto": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Texto"
+          }
+        },
+        "type": "object",
+        "required": [
+          "texto"
+        ],
+        "title": "MensajeEntrada"
+      },
+      "MensajeHistorial": {
+        "properties": {
+          "autor": {
+            "type": "string",
+            "enum": [
+              "usuario",
+              "asistente"
+            ],
+            "title": "Autor"
+          },
+          "texto": {
+            "type": "string",
+            "title": "Texto"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "mensaje",
+              "respuesta",
+              "crisis"
+            ],
+            "title": "Tipo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "autor",
+          "texto",
+          "fecha",
+          "tipo"
+        ],
+        "title": "MensajeHistorial"
+      },
+      "MensajeSalida": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "respuesta",
+              "crisis"
+            ],
+            "title": "Tipo"
+          },
+          "texto": {
+            "type": "string",
+            "title": "Texto"
+          },
+          "riesgo": {
+            "type": "string",
+            "enum": [
+              "sin_riesgo",
+              "alto"
+            ],
+            "title": "Riesgo"
+          },
+          "fragmentos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Fragmentos",
+            "default": []
+          },
+          "recursos": {
+            "items": {
+              "$ref": "#/components/schemas/Recurso"
+            },
+            "type": "array",
+            "title": "Recursos",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo",
+          "texto",
+          "riesgo"
+        ],
+        "title": "MensajeSalida"
+      },
+      "Recurso": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "telefono": {
+            "type": "string",
+            "title": "Telefono"
+          },
+          "descripcion": {
+            "type": "string",
+            "title": "Descripcion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombre",
+          "telefono",
+          "descripcion"
+        ],
+        "title": "Recurso"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VistaPaciente": {
+        "properties": {
+          "paciente_id": {
+            "type": "string",
+            "title": "Paciente Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "alertas": {
+            "items": {
+              "$ref": "#/components/schemas/Alerta"
+            },
+            "type": "array",
+            "title": "Alertas"
+          },
+          "resumen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resumen"
+          }
+        },
+        "type": "object",
+        "required": [
+          "paciente_id",
+          "nombre",
+          "alertas"
+        ],
+        "title": "VistaPaciente"
+      }
+    }
+  }
+}
