@@ -17,6 +17,8 @@ class Configuracion(BaseSettings):
     # Orígenes permitidos para CORS, separados por coma.
     origenes_cors: str = "*"
     ruta_expresiones_riesgo: str = "data/expresiones_riesgo.txt"
+    # Conexión a PostgreSQL con SQLAlchemy (BE-01). Se define en .env.
+    url_base_datos: str = "postgresql+psycopg://holo:cambiar_esta_clave@localhost:5432/holo"
 
 
 @lru_cache

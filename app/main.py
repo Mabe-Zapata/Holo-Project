@@ -1,10 +1,22 @@
 """Punto de entrada de la API de Holo."""
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import chat, consentimiento, resumen, salud, tratante
 from app.core.config import obtener_configuracion
+from app.db import crear_motor, crear_tablas
+
+
+@asynccontextmanager
+async def ciclo_de_vida(app: FastAPI):
+    # Al iniciar, crea las tablas que falten en la base (BE-01).
+    motor = crear_motor()
+    crear_tablas(motor)
+    yield
+    motor.dispose()
 
 
 def crear_app() -> FastAPI:
@@ -16,6 +28,7 @@ def crear_app() -> FastAPI:
             "API del proyecto Holo. Versión de demostración: usa cuentas "
             "ficticias y almacenamiento en memoria."
         ),
+        lifespan=ciclo_de_vida,
     )
     app.add_middleware(
         CORSMiddleware,
