@@ -1,3 +1,21 @@
 # Expresiones que activan la respuesta de crisis (RF-23).
-# Una expresión por línea. Las define y aprueba la especialista.
-# PENDIENTE: este archivo está vacío a propósito hasta recibir la lista aprobada.
+# Una expresión por línea. Lista de PRUEBA redactada por el equipo y marcada como provisional:
+# la especialista debe aprobarla antes de presentarla como detección validada.
+quiero morir
+no quiero vivir
+quiero quitarme la vida
+quiero suicidarme
+me quiero matar
+quiero acabar con mi vida
+quiero terminar con mi vida
+ya no quiero seguir viviendo
+estaria mejor muerto
+estaria mejor muerta
+nadie me extranaria
+quiero desaparecer
+quiero hacerme dano
+me quiero hacer dano
+quiero lastimarme
+me quiero cortar
+tomar todas las pastillas
+no le encuentro sentido a vivir

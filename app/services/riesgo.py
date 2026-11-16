@@ -7,21 +7,25 @@ especialista. Lo que hay aquí es provisional.
 import unicodedata
 from pathlib import Path
 
-TEXTO_CRISIS = (
-    "[Texto provisional, pendiente de aprobación de la especialista] "
-    "Lo que estás viviendo importa y no tienes que enfrentarlo a solas. "
-    "Si estás en peligro ahora, llama al ECU 911. También puedes llamar a la "
-    "línea 171, opción 6, del Ministerio de Salud Pública."
-)
+RUTA_TEXTO_CRISIS = Path(__file__).resolve().parents[2] / "data" / "texto_crisis.md"
 
-RECURSOS_AYUDA = [
-    {"nombre": "ECU 911", "telefono": "911", "descripcion": "Emergencias"},
-    {
-        "nombre": "Línea 171, opción 6",
-        "telefono": "171",
-        "descripcion": "Salud mental, Ministerio de Salud Pública",
-    },
-]
+
+def cargar_texto_crisis(ruta: Path) -> tuple[str, list[dict]]:
+    """Lee el texto fijo y los recursos de data/texto_crisis.md (HU-14).
+
+    Los recursos son líneas "- nombre | teléfono | descripción" bajo "## Recursos".
+    """
+    cuerpo, _, bloque_recursos = ruta.read_text(encoding="utf-8").partition("## Recursos")
+    texto = " ".join(cuerpo.replace("## Texto", "", 1).split())
+    recursos = []
+    for linea in bloque_recursos.splitlines():
+        if linea.strip().startswith("- "):
+            nombre, telefono, descripcion = (p.strip() for p in linea.strip()[2:].split("|"))
+            recursos.append({"nombre": nombre, "telefono": telefono, "descripcion": descripcion})
+    return texto, recursos
+
+
+TEXTO_CRISIS, RECURSOS_AYUDA = cargar_texto_crisis(RUTA_TEXTO_CRISIS)
 
 
 def normalizar(texto: str) -> str:
