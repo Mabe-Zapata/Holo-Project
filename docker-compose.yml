@@ -1,0 +1,22 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: holo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${HOLO_DB_USUARIO}
+      POSTGRES_PASSWORD: ${HOLO_DB_CLAVE}
+      POSTGRES_DB: ${HOLO_DB_NOMBRE}
+    ports:
+      - "127.0.0.1:${HOLO_DB_PUERTO:-5432}:5432"
+    volumes:
+      - holo_datos:/var/lib/postgresql/data
+      - ./docker/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  holo_datos:
