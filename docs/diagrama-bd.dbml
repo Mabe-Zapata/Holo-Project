@@ -1,0 +1,123 @@
+// Modelo de datos del MVP de Holo (PostgreSQL 16 con pgvector).
+// Para verlo: abrir https://dbdiagram.io, borrar el contenido de ejemplo y pegar este archivo.
+// Roles: usuario_estandar (sin tratante), paciente (vinculado a un profesional) y profesional (tratante).
+// Flujo: el profesional genera un código, el paciente se vincula con él, y el asistente
+// registra mensajes, alertas y estados de ánimo que alimentan el resumen entre sesiones.
+// Sprint 1 = tablas que crea app/db.py al iniciar. Los demás valores de la nota indican cuándo se implementan.
+// Todos los datos del MVP son ficticios.
+
+Project holo_mvp {
+  database_type: 'PostgreSQL'
+  Note: 'MVP de Holo. Base en Docker con pgvector. Versión de demostración con datos ficticios.'
+}
+
+Table usuarios [note: 'Cuentas de la aplicación. Sprint 1 (cuentas de demostración, BE-02).'] {
+  id varchar(50) [pk, note: 'Identificador de demostración: ana, luis o tratante']
+  nombre varchar(100) [not null]
+  rol varchar(30) [not null, note: 'usuario_estandar, paciente o profesional']
+  creado_en timestamptz [not null]
+}
+
+Table pacientes [note: 'Configuración del modo paciente. Existe solo para rol paciente. Sprint 1.'] {
+  usuario_id varchar(50) [pk, ref: - usuarios.id]
+  modulo varchar(50) [note: 'Módulo especializado activo, por ejemplo ansiedad (RF-11)']
+  nivel_sugerencia varchar(20) [not null, default: 'medio', note: 'Lo define el profesional (HU-38)']
+  tecnicas_permitidas jsonb [not null, note: 'Técnicas que el asistente puede ofrecer: respiración, anclaje']
+  creado_en timestamptz [not null]
+}
+
+Table profesionales [note: 'Profesionales tratantes: psicólogos y médicos. Sprint 1 (cuenta de demostración). Registro real en versión posterior.'] {
+  usuario_id varchar(50) [pk, ref: - usuarios.id]
+  tipo varchar(30) [not null, note: 'psicologo, psiquiatra u otro medico']
+  registro_profesional varchar(50) [note: 'Número de registro. Vacío en la demostración']
+  verificado boolean [not null, default: false, note: 'Se activa tras validar el registro']
+}
+
+Table vinculos [note: 'Relación entre paciente y profesional, creada con un código (HU-28). Sprint 1 para la demostración.'] {
+  id integer [pk, increment]
+  paciente_id varchar(50) [not null, ref: > pacientes.usuario_id]
+  profesional_id varchar(50) [not null, ref: > profesionales.usuario_id]
+  codigo_invitacion varchar(20) [unique, note: 'Código que el profesional entrega al paciente']
+  estado varchar(20) [not null, note: 'pendiente, activo o revocado']
+  creado_en timestamptz [not null]
+
+  indexes {
+    (paciente_id, profesional_id) [unique, name: 'uq_vinculo_paciente_profesional']
+  }
+}
+
+Table consentimientos [note: 'Aceptación del consentimiento informado (BE-03). Sprint 1.'] {
+  id integer [pk, increment]
+  usuario_id varchar(50) [not null, unique, ref: - usuarios.id]
+  version_texto varchar(20) [not null, note: 'Versión del consentimiento que se aceptó']
+  mayor_de_edad boolean [not null]
+  aceptado_en timestamptz [not null]
+}
+
+Table mensajes [note: 'Conversación guardada para retomarla (BE-04). Sprint 1.'] {
+  id integer [pk, increment]
+  usuario_id varchar(50) [not null, ref: > usuarios.id]
+  autor varchar(20) [not null, note: 'usuario o asistente']
+  tipo varchar(20) [not null, note: 'mensaje, respuesta o crisis']
+  texto text [not null]
+  creado_en timestamptz [not null]
+
+  indexes {
+    (usuario_id, creado_en) [name: 'ix_mensajes_usuario_fecha']
+  }
+}
+
+Table material [note: 'Textos aprobados que el asistente consulta (RF-08, RF-11). Sprint 1 con texto provisional; búsqueda por pgvector.'] {
+  id integer [pk, increment]
+  modulo varchar(50) [not null, note: 'general o nombre del módulo, por ejemplo ansiedad']
+  titulo varchar(200) [not null]
+  contenido text [not null]
+  etiquetas jsonb [not null, note: 'Temas para filtrar por modo de uso']
+  aprobado boolean [not null, default: false, note: 'Solo se usa cuando la especialista lo aprueba']
+  embedding vector(1536) [note: 'Dimensión según el modelo de embeddings elegido']
+}
+
+Table registros_animo [note: 'Estado de ánimo diario de 1 a 5 con nota opcional (HU-25). Opcional.'] {
+  id integer [pk, increment]
+  usuario_id varchar(50) [not null, ref: > usuarios.id]
+  fecha date [not null]
+  valor smallint [not null, note: 'Entre 1 y 5']
+  nota text
+
+  indexes {
+    (usuario_id, fecha) [unique, name: 'uq_animo_usuario_dia']
+  }
+}
+
+Table sesiones [note: 'Fechas de las sesiones con el profesional; delimitan el periodo del resumen (HU-34). Versión posterior.'] {
+  id integer [pk, increment]
+  vinculo_id integer [not null, ref: > vinculos.id]
+  fecha timestamptz [not null]
+}
+
+Table alertas [note: 'Situaciones de riesgo visibles para el profesional vinculado (HU-16). Sprint 2.'] {
+  id integer [pk, increment]
+  paciente_id varchar(50) [not null, ref: > pacientes.usuario_id]
+  nivel varchar(20) [not null, note: 'alto']
+  mensaje_origen text [not null, note: 'Texto que originó la alerta']
+  creado_en timestamptz [not null]
+  vista_en timestamptz [note: 'Momento en que el profesional la consultó']
+}
+
+Table auditoria [note: 'Revisión de riesgo y fragmentos de cada respuesta (BE-06). Sprint 2.'] {
+  id integer [pk, increment]
+  usuario_id varchar(50) [not null, ref: > usuarios.id]
+  riesgo varchar(20) [not null, note: 'sin_riesgo o alto']
+  fragmentos jsonb [not null, note: 'Fragmentos del material usados en la respuesta']
+  creado_en timestamptz [not null]
+}
+
+Table resumenes [note: 'Resumen del periodo generado por IA para el profesional (HU-17b). Sprint 2.'] {
+  id integer [pk, increment]
+  vinculo_id integer [not null, ref: > vinculos.id]
+  desde date [not null]
+  hasta date [not null]
+  contenido jsonb [not null, note: 'Hechos fechados, temas, patrones y alertas; sin diagnósticos']
+  generado_por_ia boolean [not null, default: true]
+  generado_en timestamptz [not null]
+}
