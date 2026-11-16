@@ -13,8 +13,8 @@ EXPRESION_DE_PRUEBA = "expresion de riesgo de prueba"
 def cliente():
     almacen.reiniciar()
     app.dependency_overrides[obtener_expresiones] = lambda: (EXPRESION_DE_PRUEBA,)
-    with TestClient(app) as c:
-        yield c
+    # Sin "with": el arranque de la app conectaría a PostgreSQL (BE-01).
+    yield TestClient(app)
     app.dependency_overrides.clear()
     almacen.reiniciar()
 

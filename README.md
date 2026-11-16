@@ -18,6 +18,7 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements-dev.txt
 copy .env.example .env
+docker compose up -d db
 uvicorn app.main:app --reload
 ```
 
@@ -28,6 +29,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-dev.txt
 cp .env.example .env
+docker compose up -d db
 uvicorn app.main:app --reload
 ```
 
