@@ -115,4 +115,5 @@ Además:
 
 - Las claves se guardan exclusivamente en el archivo `.env`, que está excluido del repositorio. Si una clave se publica por error, se revoca de inmediato y se informa al equipo.
 - No se utilizan datos de personas reales en el código, las pruebas ni los ejemplos.
+- Los registros (logs) nunca incluyen el texto de los mensajes, ni siquiera en `DEBUG`. La configuración está en `app/core/logging.py`.
 - La lista de expresiones de riesgo y el texto de crisis solo se modifican con la aprobación de la especialista, y el pull request debe indicarlo.

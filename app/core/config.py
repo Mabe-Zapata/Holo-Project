@@ -16,6 +16,8 @@ class Configuracion(BaseSettings):
     llm_api_key: str = ""
     # Orígenes permitidos para CORS, separados por coma.
     origenes_cors: str = "*"
+    # Nivel de los registros del código de Holo (BE-15). Las bibliotecas quedan en WARNING.
+    nivel_registros: str = "INFO"
     ruta_expresiones_riesgo: str = "data/expresiones_riesgo.txt"
     # Conexión a PostgreSQL con SQLAlchemy (BE-01). Se define en .env.
     url_base_datos: str = "postgresql+psycopg://holo:cambiar_esta_clave@localhost:5432/holo"
