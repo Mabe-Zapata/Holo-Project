@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import chat, consentimiento, resumen, salud, tratante
 from app.core.config import obtener_configuracion
+from app.core.logging import configurar_registros
 from app.db import crear_motor, crear_tablas
 
 
@@ -21,6 +22,7 @@ async def ciclo_de_vida(app: FastAPI):
 
 def crear_app() -> FastAPI:
     cfg = obtener_configuracion()
+    configurar_registros(cfg.nivel_registros)
     app = FastAPI(
         title=cfg.nombre_app,
         version=cfg.version,
