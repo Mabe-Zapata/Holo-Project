@@ -21,11 +21,11 @@ Un script carga entre 5 y 10 textos con etiquetas de tema, modo y módulo, y un 
 | --- | --- | --- | --- |
 | OMS, mhGAP (guía de 2023 para trastornos de ansiedad) | Respaldo de intervenciones psicológicas breves y de materiales de autoayuda | Las publicaciones de la OMS usan CC BY-NC-SA 3.0 IGO: uso no comercial con cita; una adaptación debe licenciarse igual | Alta para el marco. Falta leer el texto completo de la recomendación de autoayuda antes de citarla formalmente |
 | OMS, libro de autoayuda "Doing What Matters in Times of Stress" | Habilidades para reducir el estrés y la ansiedad | Mismo régimen CC BY-NC-SA 3.0 IGO | Media: no verificamos el texto completo |
-| NHS, Every Mind Matters: respiración 4-7-8 y consejos de sueño | Pasos de la respiración contada y hábitos para dormir | No encontramos los términos de reutilización del sitio. Solo una ficha del NHS indica "Crown Copyright" | Media-alta para el contenido, baja para la licencia |
+| NHS: respiración para el estrés y Every Mind Matters: sueño | Respiración suave, regular y sin forzar; hábitos para dormir | OGL v3.0 con las condiciones y excepciones de los términos del NHS; cualquier adaptación requiere su propia atribución | Fuente primaria consultada; la redacción para Holo sigue pendiente de revisión especializada |
 | Revisiones sistemáticas sobre respiración controlada (PMC10741869) | La respiración diafragmática tiene una base razonable para estrés y ansiedad | Artículo de acceso abierto | Alta |
 | American Academy of Sleep Medicine (2021) y guía conjunta VA/DoD (2025) | La higiene del sueño por sí sola casi nunca basta para el insomnio crónico; la terapia cognitivo-conductual (TCC-I) es el tratamiento de primera línea | Guías públicas | Alta |
 | MSP Ecuador, Línea 171 opción 6 | Atención telefónica en crisis de salud mental, sin cita previa | Institucional. Republicar el número y la descripción del servicio es información de servicio público | Alta para el servicio. **El horario no está confirmado** (ver sección 6) |
-| Grounding 5-4-3-2-1 | Técnica popular de anclaje sensorial | Sin ensayos controlados que lo respalden específicamente; una revisión de 2025 señala que la técnica carece de definición medible | Baja para la eficacia; útil como práctica de anclaje |
+| Grounding 5-4-3-2-1 | Propuesta de anclaje sensorial | Referencia específica pendiente de verificar; no se afirma eficacia clínica ni ausencia de ensayos sin una fuente comprobada | Pendiente de verificación |
 
 ## 4. Textos provisionales propuestos
 
@@ -33,9 +33,9 @@ Propuesta de 7 textos. Todos quedan con estado `provisional`.
 
 | ID | Tema | Módulo | Modo | Contenido propuesto | Fuente principal |
 | --- | --- | --- | --- | --- | --- |
-| M-01 | Respiración | ansiedad | estándar y paciente | Respiración diafragmática: pasos lentos, inhalar por la nariz y exhalar más despacio que al inhalar. Practicarla unos minutos al día. | Revisión sistemática PMC10741869 |
-| M-02 | Respiración contada | ansiedad | estándar y paciente | Técnica 4-7-8 (inhalar 4, sostener 7, exhalar 8, repetir 4 veces). Señalar que su evidencia es sobre todo de uso práctico, no de estudios controlados. | NHS, Every Mind Matters |
-| M-03 | Anclaje | ansiedad | estándar y paciente | Anclaje sensorial 5-4-3-2-1: cinco cosas que se ven, cuatro que se tocan, tres que se oyen, dos que se huelen, una que se saborea. Marcar que es una práctica de apoyo. | Práctica de anclaje (fuente popular, evidencia baja) |
+| M-01 | Respiración | ansiedad | paciente | Respiración diafragmática: pasos lentos, inhalar por la nariz y exhalar más despacio que al inhalar. Practicarla unos minutos al día. | Revisión sistemática PMC10741869 |
+| M-02 | Respiración para el estrés | ansiedad | paciente | Propuesta basada en respiración suave y regular, sin forzar, según la página específica del NHS. Redactar y revisar el texto final antes de incorporarlo; no se propone una secuencia de retenciones que esta fuente no describe. | NHS, "Breathing exercises for stress" |
+| M-03 | Anclaje | ansiedad | paciente | Propuesta de anclaje sensorial 5-4-3-2-1, pendiente de referencia y revisión especializada antes de incorporarla. No afirmar eficacia clínica. | Referencia pendiente de verificar |
 | M-04 | Preocupación | ansiedad | paciente | Escribir las preocupaciones en un papel y separar lo que se puede hacer hoy de lo que no. | NHS, Every Mind Matters (consejo sobre preocupaciones) |
 | M-05 | Hábitos de sueño | sueño | estándar y paciente | Horario regular para acostarse y levantarse, rutina de desaceleración, menos pantallas y cafeína por la tarde. Si el problema dura semanas, consultar a un profesional. | NHS, Every Mind Matters; AASM 2021 |
 | M-06 | Estrés | general | estándar y paciente | Pausas breves durante el día y una actividad agradable. Texto basado en las habilidades del libro de la OMS, parafraseado. | OMS, "Doing What Matters in Times of Stress" (verificar el texto) |
@@ -51,7 +51,7 @@ Propuesta de 7 textos. Todos quedan con estado `provisional`.
 ## 6. Pendientes antes de dar esto por usable
 
 1. **Horario de la Línea 171.** Las fuentes no coinciden: unas dicen 24 horas y otra, de lunes a domingo de 7 am a 8 pm. Confirmar con el MSP antes de publicarlo en M-07.
-2. **Licencia del NHS.** Confirmar los términos de reutilización de Every Mind Matters, o parafrasear sin copiar.
+2. **Licencia del NHS.** Aplicar los términos de reutilización y atribución publicados, incluidas sus excepciones y reglas para adaptaciones. Parafrasear o traducir no sustituye la revisión de esas condiciones.
 3. **Texto completo de la OMS.** Leer la recomendación de autoayuda en el mhGAP antes de citarla.
 4. **Revisión de la especialista.** Todo el material queda `provisional` hasta su aprobación, como exige HU-07.
 5. **Revisión de la especialista también de la lista de expresiones de riesgo** (ya provisional en `data/expresiones_riesgo.txt`), no solo de estos textos.
@@ -60,13 +60,16 @@ Propuesta de 7 textos. Todos quedan con estado `provisional`.
 
 Cada texto guarda: `id`, `titulo`, `tema`, `modulo` (`general` o `ansiedad`, `sueno`), `modo` (`estandar`, `paciente`), `estado` (`provisional` o `aprobado`), `fuente` (texto y URL de la cita) y `texto`. Así, HU-12 filtra por `modulo=ansiedad` y `modo=paciente`, y HU-08a usa `tema` y `estado`.
 
+El material con `modulo=ansiedad` solo puede usarse con `modo=paciente`. Una futura pieza para cuentas estándar debe etiquetarse como contenido general separado; no se reutiliza el módulo específico del paciente. Esta nota es investigación, no implementa el cargador ni el filtrado en ejecución de HU-07/HU-12.
+
 ## 8. Referencias
 
 - OMS, mhGAP: <https://www.ncbi.nlm.nih.gov/books/NBK598420/>
 - OMS, ansiedad (ficha informativa): <https://www.who.int/news-room/fact-sheets/detail/anxiety-disorders>
 - OMS, licencias: <https://www.who.int/about/licensing/translations/en/>
 - NHS, Every Mind Matters, sueño: <https://www.nhs.uk/every-mind-matters/mental-health-issues/sleep/>
-- NHS, Every Mind Matters, 4-7-8: <https://www.nhs.uk/every-mind-matters/mental-wellbeing-tips/how-to-fall-asleep-faster-and-sleep-better/>
+- NHS, respiración para el estrés: <https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/>
+- NHS, términos de reutilización: <https://www.nhs.uk/our-policies/terms-and-conditions/>
 - Revisión sobre respiración para estrés y ansiedad: <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10741869/>
 - AASM y VA/DoD sobre insomnio (guía de proveedores): <https://health.mil/Reference-Center/Publications/2025/11/26/Treating-Insomnia-Providers-Guide>
 - MSP Ecuador, Línea 171 opción 6 (guía): <https://copolad.eu/wp-content/uploads/2025/05/Guia-para-la-linea-171-opcion-6-Atencion-telefonica-a-personas-que-atraviesan-crisis-de-salud-mental-usos-y-consumos-problematicos-de-drogas.pdf>
