@@ -1,11 +1,27 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from pydantic_core import PydanticCustomError
+
+LIMITE_TEXTO = 2000
 
 
 class MensajeEntrada(BaseModel):
-    texto: str = Field(min_length=1, max_length=2000)
+    texto: str = Field(min_length=1, max_length=LIMITE_TEXTO)
+
+    @field_validator("texto", mode="before")
+    @classmethod
+    def validar_texto(cls, texto):
+        if isinstance(texto, str):
+            if not texto.strip():
+                raise PydanticCustomError("texto_vacio", "El mensaje no puede estar vacío.")
+            if len(texto) > LIMITE_TEXTO:
+                raise PydanticCustomError(
+                    "texto_largo",
+                    "El mensaje no puede superar los 2000 caracteres.",
+                )
+        return texto
 
 
 class Recurso(BaseModel):
