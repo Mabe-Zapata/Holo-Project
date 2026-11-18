@@ -10,7 +10,9 @@ from sqlalchemy import select
 from sqlalchemy.engine import Connection
 
 from app.db import consentimientos
-
+# Version del texto que se acepta. Es provisional hasta que entregue DOC-01
+# y se haga la revision legal
+VERSION_TEXTO_ACTUAL = "provisional-1"
 
 def registrar_consentimiento(
     conexion: Connection,
