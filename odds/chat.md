@@ -80,5 +80,6 @@ Respuesta ante riesgo alto:
 - La lista de expresiones de riesgo (`data/expresiones_riesgo.txt`) está vacía hasta recibir la versión aprobada por la especialista; mientras tanto, ningún mensaje activa la respuesta de crisis.
 - Cuando `tipo` es `crisis`, la aplicación debe mostrar la pantalla de crisis y no ofrecer técnicas.
 - Pendiente: búsqueda en el material aprobado (HU-08) y rechazo de diagnóstico y medicación en el flujo (HU-10).
+- La restricción por rol ya está aplicada: la cuenta tratante recibe 403 en el chat y su historial.
 - El proveedor real (HU-09) es una API compatible con OpenAI configurada con `HOLO_PROVEEDOR_LLM=groq`, `HOLO_LLM_API_KEY`, `HOLO_LLM_MODELO` y `HOLO_LLM_URL_BASE`. El prompt del sistema (`data/prompts/prompt_sistema.md`) se envía en cada llamada.
 - La construcción del proveedor real se difiere hasta la respuesta normal: una configuración incompleta no impide rechazar una cuenta sin consentimiento ni devolver la respuesta de crisis y registrar su alerta. En una respuesta normal, la falta de configuración produce el mismo 503 genérico que un error del proveedor. Una respuesta del modelo debe ser una cadena no vacía; no se convierten objetos ni valores nulos en mensajes.

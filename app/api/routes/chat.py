@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.deps import obtener_expresiones, obtener_proveedor, obtener_usuario
+from app.api.deps import exigir_conversacion, obtener_expresiones, obtener_proveedor
 from app.schemas.chat import MensajeEntrada, MensajeHistorial, MensajeSalida
 from app.services.almacen import ahora, almacen
 from app.services.proveedor_llm import ProveedorLLM, ProveedorNoDisponible
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 )
 def enviar_mensaje(
     entrada: MensajeEntrada,
-    usuario: dict = Depends(obtener_usuario),
+    usuario: dict = Depends(exigir_conversacion),
     expresiones: tuple = Depends(obtener_expresiones),
     proveedor: ProveedorLLM = Depends(obtener_proveedor),
 ) -> MensajeSalida:
@@ -64,5 +64,5 @@ def enviar_mensaje(
     response_model=list[MensajeHistorial],
     summary="Devuelve los mensajes anteriores del usuario (RF-07)",
 )
-def historial(usuario: dict = Depends(obtener_usuario)) -> list[dict]:
+def historial(usuario: dict = Depends(exigir_conversacion)) -> list[dict]:
     return almacen.mensajes.get(usuario["id"], [])
