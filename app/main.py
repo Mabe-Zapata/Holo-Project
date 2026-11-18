@@ -9,6 +9,7 @@ from app.api.routes import chat, consentimiento, resumen, salud, tratante
 from app.core.config import obtener_configuracion
 from app.core.logging import configurar_registros
 from app.db import crear_motor, crear_tablas
+from app.repositorios.usuarios import crear_cuentas_demo
 
 
 @asynccontextmanager
@@ -16,6 +17,9 @@ async def ciclo_de_vida(app: FastAPI):
     # Al iniciar, crea las tablas que falten en la base (BE-01).
     motor = crear_motor()
     crear_tablas(motor)
+    # Crea las cuentas de demostración que falten (BE-02).
+    with motor.begin() as conexion:
+        crear_cuentas_demo(conexion)
     yield
     motor.dispose()
 
