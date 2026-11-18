@@ -4,6 +4,7 @@ Las pruebas usan la lista real de expresiones, no la de prueba de conftest.py.
 """
 
 import pytest
+from fastapi.testclient import TestClient
 
 from app.api.deps import obtener_expresiones
 from app.main import app
@@ -11,9 +12,6 @@ from app.services.almacen import CUENTAS_DEMO, almacen
 from app.services.filtros import RESPUESTA_CLINICA, es_consulta_clinica
 from app.services.riesgo import RUTA_TEXTO_CRISIS, cargar_expresiones, es_riesgo_alto
 from tests.conftest import cabecera
-from fastapi.testclient import TestClient
-
-from pathlib import Path
 
 EXPRESIONES_REALES = tuple(
     cargar_expresiones(str(RUTA_TEXTO_CRISIS.parent / "expresiones_riesgo.txt"))
@@ -68,6 +66,7 @@ def consentir(cliente, cuenta: str) -> None:
 
 # --- Sensibilidad de la detección (sin HTTP) ---------------------------------
 
+
 @pytest.mark.parametrize("expresion", EXPRESIONES_REALES)
 def test_cada_expresion_de_la_lista_se_detecta_en_cualquier_escritura(expresion):
     assert es_riesgo_alto(f"Mensaje: {expresion.upper()}", EXPRESIONES_REALES)
@@ -100,6 +99,7 @@ def test_parafrasis_de_riesgo(parafrasis):
 
 # --- Mismo comportamiento en todas las cuentas (HTTP) ------------------------
 
+
 @pytest.mark.parametrize("cuenta", CUENTAS_CONVERSAN)
 @pytest.mark.parametrize("texto", VARIANTES_DE_RIESGO)
 def test_riesgo_muestra_crisis_en_todas_las_cuentas(cliente_real, cuenta, texto):
@@ -128,6 +128,7 @@ def test_sin_consentimiento_ninguna_cuenta_conversa(cliente_real, cuenta):
 
 
 # --- Pendientes documentados (strict: al resolverse, la prueba debe quitarse) --
+
 
 @pytest.mark.xfail(
     strict=True,
