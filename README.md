@@ -55,6 +55,7 @@ app/
   api/routes/        Un archivo por grupo de endpoints
   schemas/           Modelos de entrada y salida
   services/          Lógica: almacenamiento, riesgo y proveedor del modelo
+  repositorios/      Acceso a la base de datos con SQLAlchemy, un archivo por tipo de dato
 data/                Lista de expresiones de riesgo (pendiente de la especialista)
 docs/                Documentación del proyecto y product backlog
 odds/                Documentación de los endpoints
@@ -64,7 +65,7 @@ tests/               Pruebas automáticas
 
 ## Cuentas de demostración
 
-No existe registro ni inicio de sesión en esta entrega. Cada petición identifica la cuenta mediante la cabecera `X-Usuario-Id`.
+No existe registro ni inicio de sesión en esta entrega. Cada petición identifica la cuenta mediante la cabecera `X-Usuario-Id`. Al iniciar, el servidor guarda en la base de datos las cuentas que falten (`app/repositorios/usuarios.py`); por ahora, la API valida la cabecera con la lista de `app/services/almacen.py`.
 
 | Cuenta | Rol | Descripción |
 | --- | --- | --- |
