@@ -2,7 +2,8 @@
 
 from functools import lru_cache
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
+
 
 from app.core.config import obtener_configuracion
 from app.services.almacen import CUENTAS_DEMO
@@ -10,6 +11,11 @@ from app.services.prompts import cargar_prompt_sistema
 from app.services.proveedor_llm import ProveedorDiferido, ProveedorLLM, crear_proveedor
 from app.services.riesgo import cargar_expresiones
 
+def obtener_conexion(request: Request):
+    motor = request.app.state.motor
+
+    with motor.begin() as conexion:
+        yield conexion
 
 def obtener_usuario(
     x_usuario_id: str = Header(

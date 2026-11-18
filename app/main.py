@@ -16,6 +16,7 @@ from app.repositorios.usuarios import crear_cuentas_demo
 async def ciclo_de_vida(app: FastAPI):
     # Al iniciar, crea las tablas que falten en la base (BE-01).
     motor = crear_motor()
+    app.state.motor = motor 
     crear_tablas(motor)
     # Crea las cuentas de demostración que falten (BE-02).
     with motor.begin() as conexion:
