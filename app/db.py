@@ -94,7 +94,8 @@ def crear_motor(url: str | None = None) -> Engine:
     """Crea el motor de SQLAlchemy. Sin URL usa HOLO_URL_BASE_DATOS."""
     if url is None:
         url = obtener_configuracion().url_base_datos
-    return create_engine(url, pool_pre_ping=True)
+    # hide_parameters: los errores y registros de SQL no muestran el texto de los mensajes (BE-15).
+    return create_engine(url, pool_pre_ping=True, hide_parameters=True)
 
 
 def verificar_conexion(motor: Engine) -> bool:
