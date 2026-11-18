@@ -15,6 +15,8 @@ Cabecera `X-Usuario-Id` obligatoria.
 | --- | --- | --- | --- |
 | `texto` | texto | Sí | Mensaje del usuario, de 1 a 2000 caracteres |
 
+Un texto vacío, solo con espacios o de más de 2000 caracteres devuelve 422 con un mensaje en español (BE-16).
+
 ```bash
 curl -X POST http://127.0.0.1:8000/chat \
   -H "Content-Type: application/json" \
