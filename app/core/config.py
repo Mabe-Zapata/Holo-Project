@@ -14,6 +14,9 @@ class Configuracion(BaseSettings):
     # Proveedor del modelo de lenguaje. "eco" no usa ningún modelo (HU-09).
     proveedor_llm: str = "eco"
     llm_api_key: str = ""
+    # Modelo y dirección de la API compatible con OpenAI (HU-09). Verificar el nombre del modelo en la consola del proveedor.
+    llm_modelo: str = ""
+    llm_url_base: str = "https://api.groq.com/openai/v1"
     # Orígenes permitidos para CORS, separados por coma.
     origenes_cors: str = "*"
     # Nivel de los registros del código de Holo (BE-15). Las bibliotecas quedan en WARNING.

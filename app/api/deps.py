@@ -6,6 +6,7 @@ from fastapi import Header, HTTPException, status
 
 from app.core.config import obtener_configuracion
 from app.services.almacen import CUENTAS_DEMO
+from app.services.prompts import cargar_prompt_sistema
 from app.services.proveedor_llm import ProveedorLLM, crear_proveedor
 from app.services.riesgo import cargar_expresiones
 
@@ -32,4 +33,11 @@ def obtener_expresiones() -> tuple[str, ...]:
 
 @lru_cache
 def obtener_proveedor() -> ProveedorLLM:
-    return crear_proveedor(obtener_configuracion().proveedor_llm)
+    cfg = obtener_configuracion()
+    return crear_proveedor(
+        cfg.proveedor_llm,
+        clave=cfg.llm_api_key,
+        modelo=cfg.llm_modelo,
+        url_base=cfg.llm_url_base,
+        prompt=cargar_prompt_sistema().texto,
+    )

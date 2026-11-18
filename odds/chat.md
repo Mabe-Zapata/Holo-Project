@@ -68,12 +68,14 @@ Respuesta ante riesgo alto:
 | Código | Causa |
 | --- | --- |
 | 401 | Cuenta desconocida |
-| 403 | La cuenta no ha aceptado el consentimiento |
+| 403 | La cuenta no ha aceptado el consentimiento, o es una cuenta que no conversa (tratante) |
 | 422 | `texto` vacío, ausente o de más de 2000 caracteres |
+| 503 | El modelo no respondió. El detalle técnico no se muestra |
 
 ## Notas
 
 - La revisión de riesgo se ejecuta siempre antes de consultar al modelo. Ante riesgo alto, el modelo no interviene y se registra una alerta para el tratante.
 - La lista de expresiones de riesgo (`data/expresiones_riesgo.txt`) está vacía hasta recibir la versión aprobada por la especialista; mientras tanto, ningún mensaje activa la respuesta de crisis.
 - Cuando `tipo` es `crisis`, la aplicación debe mostrar la pantalla de crisis y no ofrecer técnicas.
-- Pendiente: búsqueda en el material aprobado (HU-08), proveedor real del modelo (HU-09), rechazo de diagnóstico y medicación (HU-10), y restricción del endpoint a los roles indicados.
+- Pendiente: búsqueda en el material aprobado (HU-08) y rechazo de diagnóstico y medicación en el flujo (HU-10).
+- El proveedor real (HU-09) es una API compatible con OpenAI configurada con `HOLO_PROVEEDOR_LLM=groq`, `HOLO_LLM_API_KEY`, `HOLO_LLM_MODELO` y `HOLO_LLM_URL_BASE`. El prompt del sistema (`data/prompts/prompt_sistema.md`) se envía en cada llamada.
