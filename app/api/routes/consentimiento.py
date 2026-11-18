@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.engine import Connection
 
 from app.api.deps import obtener_conexion, obtener_usuario
-from app.repositorios.consentimientos import (
+from app.repositorios.consentimiento import (
     registrar_consentimiento as guardar_consentimiento,
 )
 from app.schemas.consentimiento import (
