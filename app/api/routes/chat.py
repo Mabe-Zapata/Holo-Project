@@ -44,11 +44,11 @@ def enviar_mensaje(
         fragmentos: list[tuple[str, str]] = []  # HU-08: búsqueda en el material aprobado.
         try:
             texto = proveedor.responder(entrada.texto, fragmentos)
-        except ProveedorNoDisponible:
+        except ProveedorNoDisponible as error:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="El asistente no está disponible en este momento.",
-            )
+            ) from error
         salida = MensajeSalida(
             tipo="respuesta", texto=texto, riesgo="sin_riesgo", fragmentos=fragmentos
         )

@@ -7,7 +7,8 @@ estándar. El prompt del sistema se entrega al crear el proveedor, no en cada ll
 
 import json
 import urllib.request
-from typing import Callable, Protocol
+from collections.abc import Callable
+from typing import Protocol
 
 from app.services.formato import formatear_entrada
 
@@ -29,6 +30,20 @@ class ProveedorEco:
 
     def responder(self, mensaje: str, fragmentos: list[tuple[str, str]]) -> str:
         return f"[eco] {mensaje}"
+
+
+class ProveedorDiferido:
+    """Construye el proveedor solo al responder, después de los controles del chat."""
+
+    def __init__(self, fabrica: Callable[[], ProveedorLLM]) -> None:
+        self._fabrica = fabrica
+
+    def responder(self, mensaje: str, fragmentos: list[tuple[str, str]]) -> str:
+        try:
+            proveedor = self._fabrica()
+        except (ValueError, OSError) as error:
+            raise ProveedorNoDisponible("El proveedor no está disponible.") from error
+        return proveedor.responder(mensaje, fragmentos)
 
 
 def _enviar_json(url: str, cabeceras: dict, cuerpo: bytes, timeout: int) -> dict:
@@ -75,10 +90,12 @@ class ProveedorCompatibleOpenAI:
                 self._timeout,
             )
             texto = datos["choices"][0]["message"]["content"]
+            if not isinstance(texto, str) or not texto.strip():
+                raise ValueError("El modelo no devolvió un texto válido.")
         except (OSError, ValueError, KeyError, IndexError, TypeError) as error:
             # El detalle técnico no sale del backend: solo se informa que el modelo no respondió.
             raise ProveedorNoDisponible("El modelo no respondió.") from error
-        return str(texto).strip()
+        return texto.strip()
 
 
 def crear_proveedor(

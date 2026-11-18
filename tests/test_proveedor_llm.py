@@ -116,8 +116,76 @@ def test_si_el_modelo_no_responde_la_ruta_da_503_sin_detalle(cliente):
     from app.main import app
 
     app.dependency_overrides[obtener_proveedor] = lambda: ProveedorCaido()
-    cliente.post("/consentimiento", json={"mayor_de_edad": True, "acepta": True},
-                 headers={"X-Usuario-Id": "ana"})
+    cliente.post(
+        "/consentimiento",
+        json={"mayor_de_edad": True, "acepta": True},
+        headers={"X-Usuario-Id": "ana"},
+    )
     r = cliente.post("/chat", json={"texto": "hola"}, headers={"X-Usuario-Id": "ana"})
     assert r.status_code == 503
     assert "detalle técnico" not in r.text
+
+
+@pytest.mark.parametrize("contenido", [None, "   ", {"unexpected": "object"}])
+def test_contenido_invalido_del_proveedor_devuelve_503(cliente, contenido):
+    from app.api.deps import obtener_proveedor
+    from app.main import app
+    from app.services.almacen import almacen
+
+    falso = TransporteFalso(respuesta_de_chat(contenido))
+    app.dependency_overrides[obtener_proveedor] = lambda: proveedor(falso)
+    headers = {"X-Usuario-Id": "ana"}
+    cliente.post("/consentimiento", json={"mayor_de_edad": True, "acepta": True}, headers=headers)
+    respuesta = cliente.post("/chat", json={"texto": "hola"}, headers=headers)
+    assert respuesta.status_code == 503
+    assert respuesta.json()["detail"] == "El asistente no está disponible en este momento."
+    assert [m["autor"] for m in almacen.mensajes["ana"]] == ["usuario"]
+
+
+@pytest.fixture
+def proveedor_sin_configuracion(monkeypatch):
+    from app.api import deps
+    from app.core.config import Configuracion
+
+    cfg = Configuracion(_env_file=None, proveedor_llm="groq", llm_api_key="", llm_modelo="")
+    monkeypatch.setattr(deps, "obtener_configuracion", lambda: cfg)
+    deps.obtener_proveedor.cache_clear()
+    yield
+    deps.obtener_proveedor.cache_clear()
+
+
+def test_crisis_no_construye_el_proveedor_real(cliente, proveedor_sin_configuracion, monkeypatch):
+    from app.api import deps
+    from app.services.almacen import almacen
+    from tests.conftest import EXPRESION_DE_PRUEBA
+
+    def no_crear(*args, **kwargs):
+        pytest.fail("Una crisis no debe construir el proveedor real")
+
+    monkeypatch.setattr(deps, "crear_proveedor", no_crear)
+    headers = {"X-Usuario-Id": "luis"}
+    cliente.post("/consentimiento", json={"mayor_de_edad": True, "acepta": True}, headers=headers)
+    respuesta = cliente.post("/chat", json={"texto": EXPRESION_DE_PRUEBA}, headers=headers)
+    assert respuesta.status_code == 200
+    assert respuesta.json()["tipo"] == "crisis"
+    assert len(almacen.alertas["luis"]) == 1
+    assert [m["autor"] for m in almacen.mensajes["luis"]] == ["usuario", "asistente"]
+
+
+def test_configuracion_incompleta_devuelve_503_generico(cliente, proveedor_sin_configuracion):
+    headers = {"X-Usuario-Id": "ana"}
+    cliente.post("/consentimiento", json={"mayor_de_edad": True, "acepta": True}, headers=headers)
+    respuesta = cliente.post("/chat", json={"texto": "hola"}, headers=headers)
+    assert respuesta.status_code == 503
+    assert respuesta.json()["detail"] == "El asistente no está disponible en este momento."
+    assert "HOLO_LLM" not in respuesta.text
+
+
+def test_configuracion_incompleta_no_impide_rechazar_sin_consentimiento(
+    cliente, proveedor_sin_configuracion
+):
+    from app.services.almacen import almacen
+
+    respuesta = cliente.post("/chat", json={"texto": "hola"}, headers={"X-Usuario-Id": "ana"})
+    assert respuesta.status_code == 403
+    assert not almacen.mensajes

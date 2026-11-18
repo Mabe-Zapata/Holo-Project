@@ -10,9 +10,7 @@ from pathlib import Path
 
 from app.services.formato import formatear_entrada
 
-RUTA_PROMPT_SISTEMA = (
-    Path(__file__).resolve().parents[2] / "data" / "prompts" / "prompt_sistema.md"
-)
+RUTA_PROMPT_SISTEMA = Path(__file__).resolve().parents[2] / "data" / "prompts" / "prompt_sistema.md"
 
 
 @dataclass(frozen=True)
