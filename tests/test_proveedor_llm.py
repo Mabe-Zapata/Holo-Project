@@ -5,6 +5,7 @@ import pytest
 from app.services.prompts import cargar_prompt_sistema
 from app.services.proveedor_llm import (
     ProveedorCompatibleOpenAI,
+    ProveedorDiferido,
     ProveedorEco,
     ProveedorNoDisponible,
     crear_proveedor,
@@ -126,7 +127,7 @@ def test_si_el_modelo_no_responde_la_ruta_da_503_sin_detalle(cliente):
     assert "detalle técnico" not in r.text
 
 
-@pytest.mark.parametrize("contenido", [None, "   ", {"unexpected": "object"}])
+@pytest.mark.parametrize("contenido", [None, "   ", {"unexpected": "object"}, []])
 def test_contenido_invalido_del_proveedor_devuelve_503(cliente, contenido):
     from app.api.deps import obtener_proveedor
     from app.main import app
@@ -189,3 +190,37 @@ def test_configuracion_incompleta_no_impide_rechazar_sin_consentimiento(
     respuesta = cliente.post("/chat", json={"texto": "hola"}, headers={"X-Usuario-Id": "ana"})
     assert respuesta.status_code == 403
     assert not almacen.mensajes
+
+
+@pytest.mark.parametrize("usuario, texto, codigo", [("tratante", "hola", 403), ("ana", None, 422)])
+def test_rol_y_validacion_preceden_al_proveedor_sin_configurar(
+    cliente, proveedor_sin_configuracion, monkeypatch, usuario, texto, codigo
+):
+    from app.api import deps
+    from app.services.almacen import almacen
+
+    def no_crear(*args, **kwargs):
+        pytest.fail("Un rechazo de entrada o permiso no debe construir el proveedor")
+
+    monkeypatch.setattr(deps, "crear_proveedor", no_crear)
+    headers = {"X-Usuario-Id": usuario}
+    cliente.post("/consentimiento", json={"mayor_de_edad": True, "acepta": True}, headers=headers)
+    respuesta = cliente.post("/chat", json={"texto": texto}, headers=headers)
+    assert respuesta.status_code == codigo
+    assert not almacen.mensajes
+    assert not almacen.alertas
+
+
+def test_proveedor_diferido_no_comparte_instancias_entre_respuestas():
+    instancias = []
+
+    def fabrica():
+        instancia = ProveedorEco()
+        instancias.append(instancia)
+        return instancia
+
+    diferido = ProveedorDiferido(fabrica)
+    assert diferido.responder("primero", []) == "[eco] primero"
+    assert diferido.responder("segundo", []) == "[eco] segundo"
+    assert len(instancias) == 2
+    assert instancias[0] is not instancias[1]
