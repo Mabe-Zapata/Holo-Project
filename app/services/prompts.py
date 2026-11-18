@@ -8,9 +8,7 @@ el contenido del usuario nunca puede cerrar las etiquetas.
 from dataclasses import dataclass
 from pathlib import Path
 
-RUTA_PROMPT_SISTEMA = (
-    Path(__file__).resolve().parents[2] / "data" / "prompts" / "prompt_sistema.md"
-)
+RUTA_PROMPT_SISTEMA = Path(__file__).resolve().parents[2] / "data" / "prompts" / "prompt_sistema.md"
 
 
 @dataclass(frozen=True)
@@ -38,5 +36,7 @@ def _neutralizar(texto: str) -> str:
 def formatear_entrada(mensaje: str, fragmentos: list[tuple[str, str]]) -> str:
     """Arma la entrada del modelo: el material con su identificador y el mensaje."""
     material = "\n".join(f"[{id_}] {_neutralizar(texto)}" for id_, texto in fragmentos)
-    bloque_material = f"<material>\n{material}\n</material>" if material else "<material>\n</material>"
+    bloque_material = (
+        f"<material>\n{material}\n</material>" if material else "<material>\n</material>"
+    )
     return f"{bloque_material}\n<mensaje>\n{_neutralizar(mensaje)}\n</mensaje>"

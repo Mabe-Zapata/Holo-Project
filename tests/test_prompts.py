@@ -18,7 +18,7 @@ def seccion(texto: str, titulo: str) -> str:
 
 
 def viñetas(cuerpo: str) -> list[str]:
-    return [normalizar(l) for l in cuerpo.splitlines() if l.strip().startswith("- ")]
+    return [normalizar(linea) for linea in cuerpo.splitlines() if linea.strip().startswith("- ")]
 
 
 PROMPT = cargar_prompt_sistema()
