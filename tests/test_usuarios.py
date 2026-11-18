@@ -1,9 +1,11 @@
 from datetime import datetime, timezone
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import event, func, select
 
 from app.db import crear_motor, crear_tablas, pacientes, profesionales, usuarios, vinculos
+from app.main import app
 from app.repositorios.usuarios import buscar_usuario, crear_cuentas_demo
 
 
@@ -113,3 +115,27 @@ def test_buscar_usuario_inexistente(motor):
     with motor.begin() as conexion:
         crear_cuentas_demo(conexion)
         assert buscar_usuario(conexion, "desconocido") is None
+
+
+def test_se_crean_al_iniciar_y_se_conservan_al_reiniciar(monkeypatch, tmp_path):
+    # Archivo SQLite temporal en lugar de :memory:, que desaparece con cada motor:
+    # así el segundo arranque encuentra lo que dejó el primero, sin necesitar Docker.
+    url = f"sqlite:///{tmp_path / 'holo.db'}"
+    monkeypatch.setattr("app.main.crear_motor", lambda: motor_sqlite(url))
+    motor = motor_sqlite(url)
+    try:
+        with TestClient(app):  # primer arranque
+            with motor.begin() as conexion:
+                # Las cuentas ya existen mientras el servidor está encendido.
+                assert totales(conexion) == [3, 1, 1, 1]
+                conexion.execute(
+                    usuarios.update().where(usuarios.c.id == "ana").values(nombre="Ana editada")
+                )
+        with TestClient(app):  # reinicio
+            pass
+        with motor.connect() as conexion:
+            assert totales(conexion) == [3, 1, 1, 1]
+            assert buscar_usuario(conexion, "ana")["nombre"] == "Ana editada"
+            assert buscar_usuario(conexion, "luis")["tratante_id"] == "tratante"
+    finally:
+        motor.dispose()
