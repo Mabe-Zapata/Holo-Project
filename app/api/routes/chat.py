@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.api.deps import exigir_conversacion, obtener_expresiones, obtener_proveedor
 from app.schemas.chat import MensajeEntrada, MensajeHistorial, MensajeSalida
 from app.services.almacen import ahora, almacen
-from app.services.proveedor_llm import ProveedorLLM
+from app.services.proveedor_llm import ProveedorLLM, ProveedorNoDisponible
 from app.services.riesgo import RECURSOS_AYUDA, TEXTO_CRISIS, es_riesgo_alto
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -41,8 +41,14 @@ def enviar_mensaje(
             tipo="crisis", texto=TEXTO_CRISIS, riesgo="alto", recursos=RECURSOS_AYUDA
         )
     else:
-        fragmentos: list[str] = []  # HU-08: búsqueda en el material aprobado.
-        texto = proveedor.responder(entrada.texto, fragmentos)
+        fragmentos: list[tuple[str, str]] = []  # HU-08: búsqueda en el material aprobado.
+        try:
+            texto = proveedor.responder(entrada.texto, fragmentos)
+        except ProveedorNoDisponible as error:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="El asistente no está disponible en este momento.",
+            ) from error
         salida = MensajeSalida(
             tipo="respuesta", texto=texto, riesgo="sin_riesgo", fragmentos=fragmentos
         )

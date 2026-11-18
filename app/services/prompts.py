@@ -8,6 +8,8 @@ el contenido del usuario nunca puede cerrar las etiquetas.
 from dataclasses import dataclass
 from pathlib import Path
 
+from app.services.formato import formatear_entrada
+
 RUTA_PROMPT_SISTEMA = Path(__file__).resolve().parents[2] / "data" / "prompts" / "prompt_sistema.md"
 
 
@@ -28,15 +30,4 @@ def cargar_prompt_sistema(ruta: Path = RUTA_PROMPT_SISTEMA) -> PromptSistema:
     raise ValueError(f"{ruta.name} debe declarar una línea 'Versión: <número>'")
 
 
-def _neutralizar(texto: str) -> str:
-    # Ningún "<" del contenido puede abrir o cerrar una etiqueta del formato.
-    return texto.replace("<", "&lt;")
-
-
-def formatear_entrada(mensaje: str, fragmentos: list[tuple[str, str]]) -> str:
-    """Arma la entrada del modelo: el material con su identificador y el mensaje."""
-    material = "\n".join(f"[{id_}] {_neutralizar(texto)}" for id_, texto in fragmentos)
-    bloque_material = (
-        f"<material>\n{material}\n</material>" if material else "<material>\n</material>"
-    )
-    return f"{bloque_material}\n<mensaje>\n{_neutralizar(mensaje)}\n</mensaje>"
+formatear_entrada = formatear_entrada  # reexportado desde app.services.formato
