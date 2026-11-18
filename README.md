@@ -55,6 +55,7 @@ app/
   api/routes/        Un archivo por grupo de endpoints
   schemas/           Modelos de entrada y salida
   services/          Lógica: almacenamiento, riesgo y proveedor del modelo
+  repositorios/      Acceso a la base de datos con SQLAlchemy, un archivo por tipo de dato
 data/                Lista de expresiones de riesgo (pendiente de la especialista)
 docs/                Documentación del proyecto y product backlog
 odds/                Documentación de los endpoints
@@ -64,13 +65,21 @@ tests/               Pruebas automáticas
 
 ## Cuentas de demostración
 
-No existe registro ni inicio de sesión en esta entrega. Cada petición identifica la cuenta mediante la cabecera `X-Usuario-Id`.
+No existe registro ni inicio de sesión en esta entrega. Cada petición identifica la cuenta mediante la cabecera `X-Usuario-Id`. Al iniciar, el servidor guarda en la base de datos las cuentas que falten (`app/repositorios/usuarios.py`); por ahora, la API valida la cabecera con la lista de `app/services/almacen.py`.
 
 | Cuenta | Rol | Descripción |
 | --- | --- | --- |
 | `ana` | Usuaria estándar | Sin tratante |
 | `luis` | Paciente | Vinculado a la tratante de demostración |
 | `tratante` | Tratante | Consulta las alertas y el resumen de Luis |
+
+### Límite entre el repositorio de cuentas y la API
+
+La representación persistida sigue el modelo de datos: la cuenta `tratante` tiene `rol=profesional` en la tabla `usuarios`. La API de demostración todavía usa `rol=tratante` en su lista en memoria. BE-02 no cambia esa fuente de identidad ni migra roles existentes.
+
+Al conectar la identidad persistida con los permisos de la API, la tarea de integración debe normalizar explícitamente `profesional` a `tratante` en ese límite y probar los accesos permitidos y rechazados. No debe cambiar los roles almacenados durante el sembrado ni asumir que ambas representaciones ya son intercambiables. El sembrado conserva los datos y vínculos existentes, incluso los revocados.
+
+La verificación de BE-02 cubrió SQLite y un PostgreSQL 16.15 temporal con pgvector: arranque, segundo arranque y siembra repetida conservaron cuentas, perfiles, vínculo y fechas; también se conservaron ediciones y un vínculo revocado. Esta comprobación no demuestra todavía autenticación contra la base ni valida otros repositorios pendientes.
 
 ## Estado de los endpoints
 
