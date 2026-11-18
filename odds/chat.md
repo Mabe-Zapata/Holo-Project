@@ -76,4 +76,4 @@ Respuesta ante riesgo alto:
 - La revisión de riesgo se ejecuta siempre antes de consultar al modelo. Ante riesgo alto, el modelo no interviene y se registra una alerta para el tratante.
 - La lista de expresiones de riesgo (`data/expresiones_riesgo.txt`) está vacía hasta recibir la versión aprobada por la especialista; mientras tanto, ningún mensaje activa la respuesta de crisis.
 - Cuando `tipo` es `crisis`, la aplicación debe mostrar la pantalla de crisis y no ofrecer técnicas.
-- Pendiente: búsqueda en el material aprobado (HU-08), proveedor real del modelo (HU-09), rechazo de diagnóstico y medicación (HU-10), y restricción del endpoint a los roles indicados.
+- Pendiente: búsqueda en el material aprobado (HU-08), proveedor real del modelo (HU-09), rechazo de diagnóstico y medicación (HU-10), (la restricción por rol ya está aplicada: el tratante recibe 403).

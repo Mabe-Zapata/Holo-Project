@@ -19,6 +19,8 @@ EXPRESIONES_REALES = tuple(
     cargar_expresiones(str(RUTA_TEXTO_CRISIS.parent / "expresiones_riesgo.txt"))
 )
 CUENTAS = list(CUENTAS_DEMO)
+# Solo las cuentas que conversan con la IA; el tratante recibe resúmenes, no chatea.
+CUENTAS_CONVERSAN = ["ana", "luis"]
 CONSENTIMIENTO = {"mayor_de_edad": True, "acepta": True}
 
 # Variantes de escritura de una misma expresión: mayúsculas, tildes, espacios y contexto.
@@ -98,7 +100,7 @@ def test_parafrasis_de_riesgo(parafrasis):
 
 # --- Mismo comportamiento en todas las cuentas (HTTP) ------------------------
 
-@pytest.mark.parametrize("cuenta", CUENTAS)
+@pytest.mark.parametrize("cuenta", CUENTAS_CONVERSAN)
 @pytest.mark.parametrize("texto", VARIANTES_DE_RIESGO)
 def test_riesgo_muestra_crisis_en_todas_las_cuentas(cliente_real, cuenta, texto):
     consentir(cliente_real, cuenta)
@@ -110,7 +112,7 @@ def test_riesgo_muestra_crisis_en_todas_las_cuentas(cliente_real, cuenta, texto)
     assert {rec["telefono"] for rec in cuerpo["recursos"]} == {"911", "171"}
 
 
-@pytest.mark.parametrize("cuenta", CUENTAS)
+@pytest.mark.parametrize("cuenta", CUENTAS_CONVERSAN)
 @pytest.mark.parametrize("texto", HABITUALES)
 def test_mensajes_habituales_no_muestran_crisis_en_ninguna_cuenta(cliente_real, cuenta, texto):
     consentir(cliente_real, cuenta)
@@ -131,7 +133,7 @@ def test_sin_consentimiento_ninguna_cuenta_conversa(cliente_real, cuenta):
     strict=True,
     reason="HU-08b pendiente: el filtro clínico aún no está conectado a POST /chat.",
 )
-@pytest.mark.parametrize("cuenta", CUENTAS)
+@pytest.mark.parametrize("cuenta", CUENTAS_CONVERSAN)
 @pytest.mark.parametrize("texto", CLINICOS)
 def test_consulta_clinica_recibe_respuesta_fija_en_todas_las_cuentas(cliente_real, cuenta, texto):
     assert es_consulta_clinica(texto)
@@ -140,10 +142,6 @@ def test_consulta_clinica_recibe_respuesta_fija_en_todas_las_cuentas(cliente_rea
     assert cuerpo["texto"] == RESPUESTA_CLINICA
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="odds/chat.md limita POST /chat a usuario_estandar y paciente; el código no valida el rol.",
-)
 def test_el_tratante_no_puede_conversar(cliente_real):
     consentir(cliente_real, "tratante")
     r = cliente_real.post("/chat", json={"texto": "hola"}, headers=cabecera("tratante"))

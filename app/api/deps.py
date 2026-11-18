@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 
-from fastapi import Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 
 from app.core.config import obtener_configuracion
 from app.services.almacen import CUENTAS_DEMO
@@ -23,6 +23,19 @@ def obtener_usuario(
             detail="Cuenta de demostración desconocida.",
         )
     return {"id": x_usuario_id, **cuenta}
+
+
+# Solo estas cuentas conversan con el asistente. El tratante recibe resúmenes (odds/chat.md).
+ROLES_CONVERSACION = {"usuario_estandar", "paciente"}
+
+
+def exigir_conversacion(usuario: dict = Depends(obtener_usuario)) -> dict:
+    if usuario["rol"] not in ROLES_CONVERSACION:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Esta cuenta no conversa con el asistente.",
+        )
+    return usuario
 
 
 @lru_cache
