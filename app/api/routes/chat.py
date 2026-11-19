@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-
 from sqlalchemy.engine import Connection
 
 from app.api.deps import (
@@ -8,7 +7,6 @@ from app.api.deps import (
     obtener_expresiones,
     obtener_proveedor,
 )
-
 from app.repositorios.consentimiento import tiene_consentimiento
 from app.schemas.chat import MensajeEntrada, MensajeHistorial, MensajeSalida
 from app.services.almacen import ahora, almacen

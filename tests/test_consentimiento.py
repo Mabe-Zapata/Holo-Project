@@ -1,18 +1,16 @@
-
 """Pruebas del consentimiento informado (BE-03, HU-03)."""
 
 from datetime import datetime
 
 from sqlalchemy import create_engine, select
 
-from app.db import crear_tablas, consentimientos
+from app.db import consentimientos, crear_tablas
 from app.repositorios.consentimiento import (
     buscar_fecha_aceptacion,
     registrar_consentimiento,
     tiene_consentimiento,
 )
 from tests.conftest import cabecera
-
 
 CONSENTIMIENTO = {"mayor_de_edad": True, "acepta": True}
 
@@ -82,11 +80,11 @@ def test_consentimiento_se_guarda_en_base_de_datos(cliente):
     motor = cliente.app.state.motor
 
     with motor.connect() as conexion:
-        registro = conexion.execute(
-            select(consentimientos).where(
-                consentimientos.c.usuario_id == "ana"
-            )
-        ).mappings().first()
+        registro = (
+            conexion.execute(select(consentimientos).where(consentimientos.c.usuario_id == "ana"))
+            .mappings()
+            .first()
+        )
 
     assert registro is not None
     assert registro["mayor_de_edad"] is True
@@ -108,9 +106,7 @@ def test_actualizar_consentimiento_sin_duplicados(cliente):
 
     with motor.connect() as conexion:
         registros = conexion.execute(
-            select(consentimientos).where(
-                consentimientos.c.usuario_id == "ana"
-            )
+            select(consentimientos).where(consentimientos.c.usuario_id == "ana")
         ).all()
 
     assert len(registros) == 1

@@ -94,8 +94,27 @@ def crear_motor(url: str | None = None) -> Engine:
     """Crea el motor de SQLAlchemy. Sin URL usa HOLO_URL_BASE_DATOS."""
     if url is None:
         url = obtener_configuracion().url_base_datos
-    # hide_parameters: los errores y registros de SQL no muestran el texto de los mensajes (BE-15).
-    return create_engine(url, pool_pre_ping=True, hide_parameters=True)
+
+    opciones: dict = {"pool_pre_ping": True, "hide_parameters": True}
+    if url.startswith("sqlite"):
+        opciones["connect_args"] = {"check_same_thread": False}
+        if ":memory:" in url or url in ("sqlite://", "sqlite:///"):
+            from sqlalchemy.pool import StaticPool
+
+            opciones["poolclass"] = StaticPool
+
+    motor = create_engine(url, **opciones)
+
+    if url.startswith("sqlite"):
+        from sqlalchemy import event
+
+        @event.listens_for(motor, "connect")
+        def _activar_claves_foraneas(conexion_dbapi, _registro):
+            cursor = conexion_dbapi.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
+
+    return motor
 
 
 def verificar_conexion(motor: Engine) -> bool:
