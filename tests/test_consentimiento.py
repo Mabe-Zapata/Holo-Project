@@ -1,10 +1,14 @@
 """Pruebas del consentimiento informado (BE-03, HU-03)."""
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from threading import Barrier
 
-from sqlalchemy import create_engine, select
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, event, select
 
-from app.db import consentimientos, crear_tablas
+from app.db import consentimientos, crear_motor, crear_tablas
+from app.main import app
 from app.repositorios.consentimiento import (
     buscar_fecha_aceptacion,
     registrar_consentimiento,
@@ -151,3 +155,50 @@ def test_persistencia_tras_reiniciar_conexion(tmp_path):
         assert aceptado is True
     finally:
         motor_reiniciado.dispose()
+
+
+def test_primera_aceptacion_concurrente_no_falla_ni_duplica(tmp_path, monkeypatch):
+    motor = crear_motor(f"sqlite:///{(tmp_path / 'concurrente.db').as_posix()}")
+    monkeypatch.setattr("app.main.crear_motor", lambda: motor)
+    inicio = Barrier(2)
+    lecturas = Barrier(2)
+
+    def sincronizar_lecturas(_conexion, _cursor, sentencia, _parametros, _contexto, _muchos):
+        # Hace determinista la carrera si la implementación consulta antes de insertar.
+        if sentencia.startswith("SELECT consentimientos.id"):
+            lecturas.wait(timeout=5)
+
+    try:
+        with TestClient(app, raise_server_exceptions=False) as cliente:
+            event.listen(motor, "after_cursor_execute", sincronizar_lecturas)
+
+            def aceptar():
+                inicio.wait(timeout=5)
+                return cliente.post("/consentimiento", json=CONSENTIMIENTO, headers=cabecera("ana"))
+
+            try:
+                with ThreadPoolExecutor(max_workers=2) as ejecutor:
+                    futuros = [ejecutor.submit(aceptar) for _ in range(2)]
+                    respuestas = [futuro.result(timeout=15) for futuro in futuros]
+            finally:
+                event.remove(motor, "after_cursor_execute", sincronizar_lecturas)
+
+            assert [respuesta.status_code for respuesta in respuestas] == [201, 201]
+            for respuesta in respuestas:
+                assert respuesta.json()["usuario_id"] == "ana"
+                assert (
+                    datetime.fromisoformat(respuesta.json()["aceptado_en"]).utcoffset() is not None
+                )
+            with motor.connect() as conexion:
+                filas = (
+                    conexion.execute(
+                        select(consentimientos).where(consentimientos.c.usuario_id == "ana")
+                    )
+                    .mappings()
+                    .all()
+                )
+            assert len(filas) == 1
+            assert filas[0]["mayor_de_edad"] is True
+            assert filas[0]["version_texto"] == "provisional-1"
+    finally:
+        motor.dispose()

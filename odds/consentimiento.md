@@ -2,7 +2,7 @@
 
 Registra la aceptación del consentimiento informado y la declaración de mayoría de edad.
 
-- **Estado:** Operativo (almacenamiento en memoria)
+- **Estado:** Operativo con persistencia SQL (PostgreSQL; SQLite en pruebas)
 - **Requerimientos:** RF-02
 - **Historias:** HU-02, HU-03
 - **Roles permitidos:** usuario_estandar, paciente, tratante
@@ -47,5 +47,7 @@ Código `201`.
 ## Notas
 
 - Sin un consentimiento registrado, `POST /chat` responde 403.
-- Una nueva aceptación reemplaza la fecha anterior.
-- Pendiente (HU-04): persistir el registro en SQLite.
+- La aceptación persiste después de reiniciar la aplicación; el chat consulta este registro, no una marca de consentimiento en memoria.
+- Una nueva aceptación actualiza la misma fila y su fecha anterior, sin duplicar registros por usuario. Las primeras aceptaciones concurrentes se resuelven mediante una inserción/actualización atómica.
+- La fecha se genera en UTC. También se guardan la mayoría de edad declarada y la versión del texto, actualmente `provisional-1`, pendiente de DOC-01 y revisión legal.
+- Una petición rechazada por falta de aceptación o mayoría de edad no escribe el registro. La transacción pertenece a la conexión proporcionada por la aplicación.

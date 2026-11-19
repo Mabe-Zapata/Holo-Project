@@ -7,6 +7,8 @@ cada funcion recibe la conexion y la transaccion la abre quien llama.
 from datetime import datetime, timezone
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as insertar_postgresql
+from sqlalchemy.dialects.sqlite import insert as insertar_sqlite
 from sqlalchemy.engine import Connection
 
 from app.db import consentimientos
@@ -31,17 +33,17 @@ def registrar_consentimiento(
         "mayor_de_edad": mayor_de_edad,
         "aceptado_en": fecha,
     }
-    existe = conexion.execute(
-        select(consentimientos.c.id).where(consentimientos.c.usuario_id == usuario_id)
-    ).first()
-    if existe is None:
-        conexion.execute(consentimientos.insert().values(usuario_id=usuario_id, **valores))
+    # Una sola sentencia resuelve también dos primeras aceptaciones simultáneas.
+    if conexion.dialect.name == "postgresql":
+        insertar = insertar_postgresql
+    elif conexion.dialect.name == "sqlite":
+        insertar = insertar_sqlite
     else:
-        conexion.execute(
-            consentimientos.update()
-            .where(consentimientos.c.usuario_id == usuario_id)
-            .values(**valores)
-        )
+        raise ValueError("El consentimiento requiere PostgreSQL o SQLite.")
+    sentencia = insertar(consentimientos).values(usuario_id=usuario_id, **valores)
+    conexion.execute(
+        sentencia.on_conflict_do_update(index_elements=[consentimientos.c.usuario_id], set_=valores)
+    )
     return fecha
 
 
