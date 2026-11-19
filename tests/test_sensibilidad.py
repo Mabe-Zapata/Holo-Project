@@ -11,7 +11,7 @@ from app.main import app
 from app.services.almacen import CUENTAS_DEMO, almacen
 from app.services.filtros import RESPUESTA_CLINICA, es_consulta_clinica
 from app.services.riesgo import RUTA_TEXTO_CRISIS, cargar_expresiones, es_riesgo_alto
-from tests.conftest import cabecera
+from tests.conftest import cabecera, crear_motor_pruebas
 
 EXPRESIONES_REALES = tuple(
     cargar_expresiones(str(RUTA_TEXTO_CRISIS.parent / "expresiones_riesgo.txt"))
@@ -51,12 +51,18 @@ CLINICOS = [
 
 
 @pytest.fixture
-def cliente_real():
+def cliente_real(monkeypatch):
     almacen.reiniciar()
+    motor_pruebas = crear_motor_pruebas()
+    monkeypatch.setattr("app.main.crear_motor", lambda: motor_pruebas)
     app.dependency_overrides[obtener_expresiones] = lambda: EXPRESIONES_REALES
-    yield TestClient(app)
-    app.dependency_overrides.clear()
-    almacen.reiniciar()
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        app.dependency_overrides.clear()
+        almacen.reiniciar()
+        motor_pruebas.dispose()
 
 
 def consentir(cliente, cuenta: str) -> None:

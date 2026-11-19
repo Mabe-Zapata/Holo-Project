@@ -1,6 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.engine import Connection
 
-from app.api.deps import exigir_conversacion, obtener_expresiones, obtener_proveedor
+from app.api.deps import (
+    exigir_conversacion,
+    obtener_conexion,
+    obtener_expresiones,
+    obtener_proveedor,
+)
+from app.repositorios.consentimiento import tiene_consentimiento
 from app.schemas.chat import MensajeEntrada, MensajeHistorial, MensajeSalida
 from app.services.almacen import ahora, almacen
 from app.services.proveedor_llm import ProveedorLLM, ProveedorNoDisponible
@@ -19,8 +26,9 @@ def enviar_mensaje(
     usuario: dict = Depends(exigir_conversacion),
     expresiones: tuple = Depends(obtener_expresiones),
     proveedor: ProveedorLLM = Depends(obtener_proveedor),
+    conexion: Connection = Depends(obtener_conexion),
 ) -> MensajeSalida:
-    if usuario["id"] not in almacen.consentimientos:
+    if not tiene_consentimiento(conexion, usuario["id"]):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Debe aceptar el consentimiento antes de conversar.",

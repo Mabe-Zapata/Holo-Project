@@ -1,14 +1,39 @@
 """Dependencias compartidas por las rutas."""
 
+from collections.abc import Generator
 from functools import lru_cache
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
+from sqlalchemy.engine import Connection, Engine
 
 from app.core.config import obtener_configuracion
+from app.db import crear_motor, crear_tablas
+from app.repositorios.usuarios import crear_cuentas_demo
 from app.services.almacen import CUENTAS_DEMO
 from app.services.prompts import cargar_prompt_sistema
 from app.services.proveedor_llm import ProveedorDiferido, ProveedorLLM, crear_proveedor
 from app.services.riesgo import cargar_expresiones
+
+_motor_defecto: Engine | None = None
+
+
+def _obtener_motor_por_defecto() -> Engine:
+    global _motor_defecto
+    if _motor_defecto is None:
+        _motor_defecto = crear_motor("sqlite:///:memory:")
+        crear_tablas(_motor_defecto)
+        with _motor_defecto.begin() as conexion:
+            crear_cuentas_demo(conexion)
+    return _motor_defecto
+
+
+def obtener_conexion(request: Request) -> Generator[Connection, None, None]:
+    motor = getattr(request.app.state, "motor", None)
+    if motor is None:
+        motor = _obtener_motor_por_defecto()
+
+    with motor.begin() as conexion:
+        yield conexion
 
 
 def obtener_usuario(
