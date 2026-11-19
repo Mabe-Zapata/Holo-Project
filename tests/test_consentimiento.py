@@ -142,6 +142,26 @@ def test_persistencia_tras_reiniciar_conexion(tmp_path):
     finally:
         motor.dispose()
 
+
+def test_registrar_consentimiento_respeta_rollback_del_llamador(cliente):
+    motor = cliente.app.state.motor
+    with motor.connect() as conexion:
+        transaccion = conexion.begin()
+        registrar_consentimiento(conexion, "ana", True)
+        transaccion.rollback()
+        assert conexion.execute(select(consentimientos)).first() is None
+
+    respuesta = cliente.post("/consentimiento", headers=cabecera("ana"), json=CONSENTIMIENTO)
+    assert respuesta.status_code == 201
+    with motor.connect() as conexion:
+        antes = dict(conexion.execute(select(consentimientos)).mappings().one())
+        conexion.rollback()
+        transaccion = conexion.begin()
+        registrar_consentimiento(conexion, "ana", True, version_texto="rollback-only")
+        transaccion.rollback()
+        despues = dict(conexion.execute(select(consentimientos)).mappings().one())
+        assert despues == antes
+
     # Segunda conexión: comprobar que la fecha sigue guardada.
     motor_reiniciado = create_engine(url)
 
