@@ -100,3 +100,40 @@ def test_usuario_inexistente_lanza_error_de_integridad(motor):
     with pytest.raises(IntegrityError):
         with motor.begin() as conexion:
             guardar_mensaje(conexion, "desconocido", "usuario", "texto", "hola", BASE)
+
+
+@pytest.mark.parametrize("fecha_origen", ["2026-11-10T10:00:00+02:00", "2026-11-10T03:00:00-05:00"])
+def test_normaliza_zonas_horarias_antes_de_ordenar(motor, fecha_origen):
+    with motor.begin() as conexion:
+        crear_cuentas_demo(conexion)
+        guardar_mensaje(
+            conexion,
+            "ana",
+            "usuario",
+            "mensaje",
+            "primero",
+            datetime.fromisoformat(fecha_origen),
+        )
+        guardar_mensaje(conexion, "ana", "asistente", "respuesta", "segundo", BASE)
+        filas = listar_mensajes(conexion, "ana")
+    assert [fila["texto"] for fila in filas] == ["primero", "segundo"]
+    assert sin_zona(filas[0]["fecha"]) == datetime(2026, 11, 10, 8, 0)
+
+
+def test_fechas_sin_zona_se_interpretan_como_utc(motor):
+    with motor.begin() as conexion:
+        crear_cuentas_demo(conexion)
+        guardar_mensaje(
+            conexion, "ana", "usuario", "mensaje", "sin zona", datetime(2026, 11, 10, 8, 0)
+        )
+        guardar_mensaje(
+            conexion,
+            "ana",
+            "asistente",
+            "respuesta",
+            "con zona",
+            datetime.fromisoformat("2026-11-10T10:00:00+02:00"),
+        )
+        filas = listar_mensajes(conexion, "ana")
+    assert [fila["texto"] for fila in filas] == ["sin zona", "con zona"]
+    assert all(sin_zona(fila["fecha"]) == datetime(2026, 11, 10, 8, 0) for fila in filas)

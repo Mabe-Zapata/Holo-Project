@@ -2,6 +2,7 @@
 
 Guarda y lista los mensajes de cada usuario. Como el resto de los repositorios, cada función
 recibe la conexión y la transacción la abre quien llama, por ejemplo con `motor.begin()`.
+Este componente no conecta todavía las rutas de chat e historial a la base de datos.
 """
 
 from datetime import datetime, timezone
@@ -20,7 +21,16 @@ def guardar_mensaje(
     texto: str,
     fecha: datetime | None = None,
 ) -> None:
-    """Guarda un mensaje del usuario. Sin fecha usa la hora actual (UTC)."""
+    """Guarda un mensaje con fecha normalizada a UTC.
+
+    Sin fecha usa la hora actual. Una fecha sin zona se interpreta como UTC,
+    sin consultar la zona del equipo que ejecuta la aplicación.
+    """
+    fecha_utc = fecha if fecha is not None else datetime.now(timezone.utc)
+    if fecha_utc.utcoffset() is None:
+        fecha_utc = fecha_utc.replace(tzinfo=timezone.utc)
+    else:
+        fecha_utc = fecha_utc.astimezone(timezone.utc)
     # La fecha opcional permite cargar las conversaciones de Luis con su día de origen (BE-07b).
     conexion.execute(
         mensajes.insert().values(
@@ -28,7 +38,7 @@ def guardar_mensaje(
             autor=autor,
             tipo=tipo,
             texto=texto,
-            creado_en=fecha if fecha is not None else datetime.now(timezone.utc),
+            creado_en=fecha_utc,
         )
     )
 
