@@ -34,7 +34,7 @@
         "tags": [
           "consentimiento"
         ],
-        "summary": "Registra el consentimiento informado (RF-02)",
+        "summary": "Registra el consentimiento informado (BE-03, HU-03)",
         "operationId": "registrar_consentimiento_consentimiento_post",
         "parameters": [
           {

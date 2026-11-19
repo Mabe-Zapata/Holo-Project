@@ -86,7 +86,7 @@ La verificación de BE-02 cubrió SQLite y un PostgreSQL 16.15 temporal con pgve
 | Endpoint | Estado | Historia pendiente |
 | --- | --- | --- |
 | `GET /salud` | Operativo | |
-| `POST /consentimiento` | Operativo, en memoria | HU-04 (persistencia en SQLite) |
+| `POST /consentimiento` | Operativo, persistido en SQL (BE-03 / HU-03) | |
 | `POST /chat` | Operativo con proveedor de prueba (eco), sin búsqueda en el material | HU-08, HU-09 |
 | `GET /chat/historial` | Operativo, en memoria | HU-06 |
 | `POST /resumen` | Responde 501 | HU-17 |
