@@ -25,6 +25,8 @@ class Configuracion(BaseSettings):
     ruta_expresiones_riesgo: str = "data/expresiones_riesgo.txt"
     # Conexión a PostgreSQL con SQLAlchemy (BE-01). Se define en .env.
     url_base_datos: str = "postgresql+psycopg://holo:cambiar_esta_clave@localhost:5432/holo"
+    # Estados del material que el asistente puede usar (HU-08b). Por defecto solo el aprobado.
+    estados_material: str = "aprobado"
     # Cola local de eventos de crisis que no pudieron guardarse en la base (HU-16).
     ruta_cola_pendientes: str = "data/cola/pendientes.jsonl"
     # Reintento automático de la cola en segundo plano y su intervalo en segundos.
