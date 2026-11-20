@@ -11,7 +11,7 @@ from app.main import app
 from app.services.almacen import CUENTAS_DEMO, almacen
 from app.services.filtros import RESPUESTA_CLINICA, es_consulta_clinica
 from app.services.riesgo import RUTA_TEXTO_CRISIS, cargar_expresiones, es_riesgo_alto
-from tests.conftest import cabecera, crear_motor_pruebas
+from tests.conftest import cabecera, crear_motor_pruebas, sembrar_material
 
 EXPRESIONES_REALES = tuple(
     cargar_expresiones(str(RUTA_TEXTO_CRISIS.parent / "expresiones_riesgo.txt"))
@@ -58,6 +58,7 @@ def cliente_real(monkeypatch):
     app.dependency_overrides[obtener_expresiones] = lambda: EXPRESIONES_REALES
     try:
         with TestClient(app) as test_client:
+            sembrar_material(app.state.motor)
             yield test_client
     finally:
         app.dependency_overrides.clear()
@@ -136,10 +137,6 @@ def test_sin_consentimiento_ninguna_cuenta_conversa(cliente_real, cuenta):
 # --- Pendientes documentados (strict: al resolverse, la prueba debe quitarse) --
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="HU-08b pendiente: el filtro clínico aún no está conectado a POST /chat.",
-)
 @pytest.mark.parametrize("cuenta", CUENTAS_CONVERSAN)
 @pytest.mark.parametrize("texto", CLINICOS)
 def test_consulta_clinica_recibe_respuesta_fija_en_todas_las_cuentas(cliente_real, cuenta, texto):

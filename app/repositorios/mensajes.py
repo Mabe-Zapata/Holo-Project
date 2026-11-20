@@ -20,6 +20,7 @@ def guardar_mensaje(
     texto: str,
     fecha: datetime | None = None,
     id_evento: str | None = None,
+    fragmentos: list[str] | None = None,
 ) -> None:
     """Guarda un mensaje con fecha normalizada a UTC.
 
@@ -41,6 +42,7 @@ def guardar_mensaje(
             texto=texto,
             creado_en=fecha_utc,
             id_evento=id_evento,
+            fragmentos=fragmentos,
         )
     )
 
@@ -49,9 +51,9 @@ def buscar_mensaje_por_evento(conexion: Connection, usuario_id: str, id_evento: 
     """Devuelve el mensaje guardado con ese identificador de evento, o None."""
     fila = (
         conexion.execute(
-            select(mensajes.c.autor, mensajes.c.tipo, mensajes.c.texto).where(
-                mensajes.c.usuario_id == usuario_id, mensajes.c.id_evento == id_evento
-            )
+            select(
+                mensajes.c.autor, mensajes.c.tipo, mensajes.c.texto, mensajes.c.fragmentos
+            ).where(mensajes.c.usuario_id == usuario_id, mensajes.c.id_evento == id_evento)
         )
         .mappings()
         .first()
