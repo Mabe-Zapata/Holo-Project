@@ -31,6 +31,8 @@ chroma/
 
 # --- Material sin aprobar y datos locales ---
 data/material/privado/
+# Cola de eventos de crisis pendientes: contiene texto sensible, nunca se sube.
+data/cola/
 
 # --- Editores y sistema operativo ---
 .vscode/

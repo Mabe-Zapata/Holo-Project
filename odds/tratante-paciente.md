@@ -24,6 +24,7 @@ Código `200`.
 | `paciente_id` | texto | Identificador del paciente vinculado |
 | `nombre` | texto | Nombre del paciente |
 | `alertas` | lista de objetos | Alertas registradas, cada una con `nivel`, `mensaje` y `fecha` |
+| `alertas_pendientes` | número | Alertas en la cola local que aún no llegaron a la base |
 | `resumen` | texto o nulo | Último resumen generado. Su forma definitiva se establecerá en HU-17 |
 
 ```json

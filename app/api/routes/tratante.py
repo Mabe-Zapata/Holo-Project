@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.engine import Connection
 
-from app.api.deps import obtener_conexion, obtener_usuario
+from app.api.deps import obtener_cola, obtener_conexion, obtener_usuario
 from app.repositorios.alertas import listar_alertas
 from app.repositorios.usuarios import buscar_usuario
 from app.repositorios.vinculos import buscar_paciente_vinculado
 from app.schemas.tratante import VistaPaciente
+from app.services.cola import ColaPendientes
 
 router = APIRouter(prefix="/tratante", tags=["tratante"])
 
@@ -18,6 +19,7 @@ router = APIRouter(prefix="/tratante", tags=["tratante"])
 def vista_paciente(
     usuario: dict = Depends(obtener_usuario),
     conexion: Connection = Depends(obtener_conexion),
+    cola: ColaPendientes = Depends(obtener_cola),
 ) -> VistaPaciente:
     if usuario["rol"] != "tratante":
         raise HTTPException(
@@ -38,5 +40,6 @@ def vista_paciente(
         paciente_id=paciente_id,
         nombre=paciente["nombre"],
         alertas=listar_alertas(conexion, paciente_id),
+        alertas_pendientes=sum(1 for e in cola.pendientes() if e["usuario_id"] == paciente_id),
         resumen=None,  # HU-17
     )

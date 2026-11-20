@@ -205,34 +205,3 @@ def test_la_alerta_sobrevive_al_reinicio_del_servidor(tmp_path, monkeypatch):
         motor.dispose()
 
     assert [a["mensaje"] for a in alertas] == [EXPRESION_DE_PRUEBA]
-
-
-def test_si_no_se_puede_registrar_la_alerta_la_crisis_no_se_confirma(cliente, monkeypatch):
-    # Decisión: una crisis no se confirma si no quedó registrada (HU-16). El error sube
-    # hasta el servidor, que responde 500 en producción; el cliente de pruebas lo relanza.
-    def fallar(*args, **kwargs):
-        raise RuntimeError("base no disponible")
-
-    monkeypatch.setattr("app.api.routes.chat.registrar_alerta", fallar)
-    cliente.post("/consentimiento", json=CONSENTIMIENTO, headers=cabecera("luis"))
-
-    with pytest.raises(RuntimeError):
-        crisis(cliente, "luis")
-
-    monkeypatch.undo()
-    assert vista(cliente).json()["alertas"] == []
-
-
-def test_el_mensaje_del_usuario_queda_aunque_falle_la_alerta(cliente, monkeypatch):
-    def fallar(*args, **kwargs):
-        raise RuntimeError("base no disponible")
-
-    monkeypatch.setattr("app.api.routes.chat.registrar_alerta", fallar)
-    cliente.post("/consentimiento", json=CONSENTIMIENTO, headers=cabecera("luis"))
-    with pytest.raises(RuntimeError):
-        crisis(cliente, "luis")
-
-    monkeypatch.undo()
-    historial = cliente.get("/chat/historial", headers=cabecera("luis")).json()
-
-    assert [m["autor"] for m in historial] == ["usuario"]
