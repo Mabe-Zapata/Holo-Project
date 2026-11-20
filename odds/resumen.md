@@ -2,7 +2,7 @@
 
 Genera el resumen de los últimos siete días del paciente vinculado al tratante.
 
-- **Estado:** Pendiente. Actualmente responde 501
+- **Estado:** Operativo. Requiere un proveedor real del modelo (`HOLO_PROVEEDOR_LLM=groq`); con el proveedor de prueba responde 502.
 - **Requerimientos:** RF-19
 - **Historia:** HU-17
 - **Roles permitidos:** tratante
@@ -15,9 +15,9 @@ Cabecera `X-Usuario-Id` obligatoria, con una cuenta de rol tratante. No requiere
 curl -X POST http://127.0.0.1:8000/resumen -H "X-Usuario-Id: tratante"
 ```
 
-## Respuesta propuesta
+## Respuesta
 
-El siguiente contrato es una propuesta para la historia HU-17 y puede ajustarse durante su implementación. Código `201`.
+Código `201`. Se guarda el resumen; `GET /tratante/paciente` devuelve el último.
 
 | Campo | Tipo | Descripción |
 | --- | --- | --- |
@@ -52,7 +52,9 @@ El siguiente contrato es una propuesta para la historia HU-17 y puede ajustarse 
 | --- | --- |
 | 401 | Cuenta desconocida |
 | 403 | La cuenta no tiene rol de tratante |
-| 501 | Endpoint aún no implementado |
+| 403 | El tratante no tiene un paciente vinculado |
+| 502 | El modelo no devolvió un resumen válido |
+| 503 | El modelo no está disponible; no se guarda nada |
 
 ## Notas
 
