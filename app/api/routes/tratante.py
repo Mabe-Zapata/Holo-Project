@@ -3,6 +3,7 @@ from sqlalchemy.engine import Connection
 
 from app.api.deps import obtener_cola, obtener_conexion, obtener_usuario
 from app.repositorios.alertas import listar_alertas
+from app.repositorios.resumenes import ultimo_resumen
 from app.repositorios.usuarios import buscar_usuario
 from app.repositorios.vinculos import buscar_paciente_vinculado
 from app.schemas.tratante import VistaPaciente
@@ -41,5 +42,5 @@ def vista_paciente(
         nombre=paciente["nombre"],
         alertas=listar_alertas(conexion, paciente_id),
         alertas_pendientes=sum(1 for e in cola.pendientes() if e["usuario_id"] == paciente_id),
-        resumen=None,  # HU-17
+        resumen=ultimo_resumen(conexion, paciente_id),
     )

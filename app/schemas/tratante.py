@@ -15,4 +15,5 @@ class VistaPaciente(BaseModel):
     alertas: list[Alerta]
     # Alertas que aún no llegaron a la base y se están sincronizando.
     alertas_pendientes: int = 0
-    resumen: str | None = None
+    # Último resumen semanal generado (POST /resumen), o nulo si todavía no hay.
+    resumen: dict | None = None

@@ -108,6 +108,18 @@ material = Table(
     Column("texto", Text, nullable=False),
 )
 
+# Resúmenes semanales generados para el tratante (HU-17b). Se guarda la respuesta completa.
+resumenes = Table(
+    "resumenes",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("paciente_id", String(50), ForeignKey("usuarios.id"), nullable=False),
+    Column("generado_en", DateTime(timezone=True), nullable=False),
+    Column("contenido", JSON, nullable=False),
+)
+
+Index("ix_resumenes_paciente_fecha", resumenes.c.paciente_id, resumenes.c.generado_en)
+
 alertas = Table(
     "alertas",
     metadata,

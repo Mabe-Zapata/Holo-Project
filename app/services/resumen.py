@@ -7,6 +7,7 @@ que tocan temas clínicos. La respuesta indica siempre que fue generada por IA.
 
 import json
 import re
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from app.core.config import obtener_configuracion
@@ -96,3 +97,30 @@ def crear_resumidor() -> ProveedorLLM:
         url_base=cfg.llm_url_base,
         prompt=prompt,
     )
+
+
+VENTANA_DIAS = 7
+
+
+def periodo(ahora_: datetime) -> tuple[date, date]:
+    """Los últimos siete días, incluido el de hoy."""
+    return (ahora_ - timedelta(days=VENTANA_DIAS)).date(), ahora_.date()
+
+
+def _utc(fecha: datetime) -> datetime:
+    # SQLite devuelve fechas sin zona horaria; se interpretan como UTC.
+    return fecha.replace(tzinfo=timezone.utc) if fecha.tzinfo is None else fecha
+
+
+def mensajes_de_la_semana(mensajes: list[dict], ahora_: datetime) -> list[dict]:
+    limite = ahora_ - timedelta(days=VENTANA_DIAS)
+    return [m for m in mensajes if _utc(m["fecha"]) >= limite]
+
+
+def alertas_del_periodo(alertas: list[dict], desde: date, hasta: date) -> list[dict]:
+    """Alertas dentro del periodo, con la fecha en texto para guardarlas como JSON."""
+    return [
+        {"fecha": _utc(a["fecha"]).isoformat(), "nivel": a["nivel"], "mensaje": a["mensaje"]}
+        for a in alertas
+        if desde <= _utc(a["fecha"]).date() <= hasta
+    ]
