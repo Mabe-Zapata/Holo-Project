@@ -8,6 +8,7 @@ from app.api.deps import (
     obtener_proveedor,
 )
 from app.repositorios.consentimiento import tiene_consentimiento
+from app.repositorios.mensajes import guardar_mensaje, listar_mensajes
 from app.schemas.chat import MensajeEntrada, MensajeHistorial, MensajeSalida
 from app.services.almacen import ahora, almacen
 from app.services.proveedor_llm import ProveedorLLM, ProveedorNoDisponible
@@ -34,11 +35,10 @@ def enviar_mensaje(
             detail="Debe aceptar el consentimiento antes de conversar.",
         )
 
-    historial = almacen.mensajes.setdefault(usuario["id"], [])
     fecha = ahora()
-    historial.append(
-        {"autor": "usuario", "texto": entrada.texto, "fecha": fecha, "tipo": "mensaje"}
-    )
+    guardar_mensaje(conexion, usuario["id"], "usuario", "mensaje", entrada.texto, fecha)
+    # El mensaje del usuario queda guardado aunque el modelo no responda.
+    conexion.commit()
 
     # La revisión de riesgo ocurre siempre antes de consultar al modelo.
     if es_riesgo_alto(entrada.texto, expresiones):
@@ -61,9 +61,8 @@ def enviar_mensaje(
             tipo="respuesta", texto=texto, riesgo="sin_riesgo", fragmentos=fragmentos
         )
 
-    historial.append(
-        {"autor": "asistente", "texto": salida.texto, "fecha": ahora(), "tipo": salida.tipo}
-    )
+    guardar_mensaje(conexion, usuario["id"], "asistente", salida.tipo, salida.texto, ahora())
+    conexion.commit()
     return salida
 
 
@@ -72,5 +71,8 @@ def enviar_mensaje(
     response_model=list[MensajeHistorial],
     summary="Devuelve los mensajes anteriores del usuario (RF-07)",
 )
-def historial(usuario: dict = Depends(exigir_conversacion)) -> list[dict]:
-    return almacen.mensajes.get(usuario["id"], [])
+def historial(
+    usuario: dict = Depends(exigir_conversacion),
+    conexion: Connection = Depends(obtener_conexion),
+) -> list[dict]:
+    return listar_mensajes(conexion, usuario["id"])

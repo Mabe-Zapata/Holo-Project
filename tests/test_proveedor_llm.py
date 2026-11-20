@@ -131,7 +131,6 @@ def test_si_el_modelo_no_responde_la_ruta_da_503_sin_detalle(cliente):
 def test_contenido_invalido_del_proveedor_devuelve_503(cliente, contenido):
     from app.api.deps import obtener_proveedor
     from app.main import app
-    from app.services.almacen import almacen
 
     falso = TransporteFalso(respuesta_de_chat(contenido))
     app.dependency_overrides[obtener_proveedor] = lambda: proveedor(falso)
@@ -140,7 +139,8 @@ def test_contenido_invalido_del_proveedor_devuelve_503(cliente, contenido):
     respuesta = cliente.post("/chat", json={"texto": "hola"}, headers=headers)
     assert respuesta.status_code == 503
     assert respuesta.json()["detail"] == "El asistente no está disponible en este momento."
-    assert [m["autor"] for m in almacen.mensajes["ana"]] == ["usuario"]
+    historial = cliente.get("/chat/historial", headers=headers).json()
+    assert [m["autor"] for m in historial] == ["usuario"]
 
 
 @pytest.fixture
@@ -170,7 +170,8 @@ def test_crisis_no_construye_el_proveedor_real(cliente, proveedor_sin_configurac
     assert respuesta.status_code == 200
     assert respuesta.json()["tipo"] == "crisis"
     assert len(almacen.alertas["luis"]) == 1
-    assert [m["autor"] for m in almacen.mensajes["luis"]] == ["usuario", "asistente"]
+    historial = cliente.get("/chat/historial", headers=headers).json()
+    assert [m["autor"] for m in historial] == ["usuario", "asistente"]
 
 
 def test_configuracion_incompleta_devuelve_503_generico(cliente, proveedor_sin_configuracion):
@@ -185,11 +186,9 @@ def test_configuracion_incompleta_devuelve_503_generico(cliente, proveedor_sin_c
 def test_configuracion_incompleta_no_impide_rechazar_sin_consentimiento(
     cliente, proveedor_sin_configuracion
 ):
-    from app.services.almacen import almacen
-
     respuesta = cliente.post("/chat", json={"texto": "hola"}, headers={"X-Usuario-Id": "ana"})
     assert respuesta.status_code == 403
-    assert not almacen.mensajes
+    assert cliente.get("/chat/historial", headers={"X-Usuario-Id": "ana"}).json() == []
 
 
 @pytest.mark.parametrize("usuario, texto, codigo", [("tratante", "hola", 403), ("ana", None, 422)])
@@ -207,7 +206,7 @@ def test_rol_y_validacion_preceden_al_proveedor_sin_configurar(
     cliente.post("/consentimiento", json={"mayor_de_edad": True, "acepta": True}, headers=headers)
     respuesta = cliente.post("/chat", json={"texto": texto}, headers=headers)
     assert respuesta.status_code == codigo
-    assert not almacen.mensajes
+    assert cliente.get("/chat/historial", headers={"X-Usuario-Id": "ana"}).json() == []
     assert not almacen.alertas
 
 
