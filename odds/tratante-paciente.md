@@ -2,7 +2,7 @@
 
 Devuelve las alertas y el último resumen del paciente vinculado al tratante.
 
-- **Estado:** Operativo parcial. Devuelve las alertas; el campo `resumen` es nulo hasta implementar HU-17
+- **Estado:** Operativo parcial. Devuelve las alertas guardadas en la base; el campo `resumen` es nulo hasta implementar HU-17
 - **Requerimientos:** RF-25, RF-30
 - **Historias:** HU-16, HU-18
 - **Roles permitidos:** tratante
@@ -42,11 +42,11 @@ Código `200`.
 | Código | Causa |
 | --- | --- |
 | 401 | Cuenta desconocida |
-| 403 | La cuenta no tiene rol de tratante |
-| 404 | El tratante no tiene pacientes vinculados |
+| 403 | La cuenta no tiene rol de tratante, o no tiene un paciente vinculado activo |
 
 ## Notas
 
 - El tratante solo accede a los datos de su paciente vinculado y nunca a la conversación completa.
 - El campo `mensaje` de la alerta contiene el texto que la originó, a fin de que el tratante conozca el contexto.
-- Pendiente (HU-16): persistencia de las alertas en SQLite.
+- Las alertas se listan de la más antigua a la más reciente.
+- Una crisis se confirma solo si su alerta quedó registrada; si no, la petición falla y la persona puede reintentar.

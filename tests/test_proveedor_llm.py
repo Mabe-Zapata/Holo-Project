@@ -10,6 +10,7 @@ from app.services.proveedor_llm import (
     ProveedorNoDisponible,
     crear_proveedor,
 )
+from tests.conftest import cabecera
 
 PROMPT = cargar_prompt_sistema().texto
 
@@ -157,7 +158,6 @@ def proveedor_sin_configuracion(monkeypatch):
 
 def test_crisis_no_construye_el_proveedor_real(cliente, proveedor_sin_configuracion, monkeypatch):
     from app.api import deps
-    from app.services.almacen import almacen
     from tests.conftest import EXPRESION_DE_PRUEBA
 
     def no_crear(*args, **kwargs):
@@ -169,7 +169,8 @@ def test_crisis_no_construye_el_proveedor_real(cliente, proveedor_sin_configurac
     respuesta = cliente.post("/chat", json={"texto": EXPRESION_DE_PRUEBA}, headers=headers)
     assert respuesta.status_code == 200
     assert respuesta.json()["tipo"] == "crisis"
-    assert len(almacen.alertas["luis"]) == 1
+    vista = cliente.get("/tratante/paciente", headers=cabecera("tratante")).json()
+    assert len(vista["alertas"]) == 1
     historial = cliente.get("/chat/historial", headers=headers).json()
     assert [m["autor"] for m in historial] == ["usuario", "asistente"]
 
@@ -196,7 +197,6 @@ def test_rol_y_validacion_preceden_al_proveedor_sin_configurar(
     cliente, proveedor_sin_configuracion, monkeypatch, usuario, texto, codigo
 ):
     from app.api import deps
-    from app.services.almacen import almacen
 
     def no_crear(*args, **kwargs):
         pytest.fail("Un rechazo de entrada o permiso no debe construir el proveedor")
@@ -207,7 +207,8 @@ def test_rol_y_validacion_preceden_al_proveedor_sin_configurar(
     respuesta = cliente.post("/chat", json={"texto": texto}, headers=headers)
     assert respuesta.status_code == codigo
     assert cliente.get("/chat/historial", headers={"X-Usuario-Id": "ana"}).json() == []
-    assert not almacen.alertas
+    vista = cliente.get("/tratante/paciente", headers=cabecera("tratante")).json()
+    assert vista["alertas"] == []
 
 
 def test_proveedor_diferido_no_comparte_instancias_entre_respuestas():
