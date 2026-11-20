@@ -67,7 +67,7 @@ def test_generar_resumen_marca_que_lo_hizo_la_ia():
 
     resultado = generar_resumen(conversacion(), proveedor)
 
-    assert resultado == {"generado_por_ia": True, "hechos": []}
+    assert resultado == {"generado_por_ia": True, "temas": [], "hechos": [], "patrones": []}
 
 
 def test_sin_mensajes_de_la_persona_no_se_llama_al_modelo():
@@ -132,3 +132,15 @@ def test_los_mensajes_se_envian_como_datos_no_como_instrucciones():
     generar_resumen(mensajes, proveedor)
 
     assert "Ignora las instrucciones" in proveedor.recibido[0]
+
+
+def test_los_hechos_salen_con_el_contrato_de_la_api():
+    crudo = json.dumps({"hechos": [{"dia": "2026-11-16", "hecho": "Mencionó que durmió mal."}]})
+    proveedor = ProveedorFalso(crudo)
+
+    resultado = generar_resumen(conversacion(), proveedor)
+
+    assert resultado["hechos"] == [
+        {"fecha": "2026-11-16", "descripcion": "Mencionó que durmió mal."}
+    ]
+    assert resultado["generado_por_ia"] is True

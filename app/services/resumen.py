@@ -70,13 +70,19 @@ def parsear_hechos(crudo: str, dias_validos: set[str]) -> list[dict]:
 
 
 def generar_resumen(mensajes: list[dict], proveedor: ProveedorLLM) -> dict:
-    """Resumen de la semana. Sin mensajes de la persona, no se llama al modelo."""
+    """Resumen con el contrato de odds/resumen.md. Sin mensajes de la persona no se llama al modelo.
+
+    `temas` y `patrones` quedan vacíos hasta que HU-17 los incorpore.
+    """
     del_usuario = [m for m in mensajes if m["autor"] == "usuario"]
-    if not del_usuario:
-        return {"generado_por_ia": True, "hechos": []}
-    dias = {m["fecha"].date().isoformat() for m in del_usuario}
-    crudo = proveedor.responder(preparar_mensajes(del_usuario), [])
-    return {"generado_por_ia": True, "hechos": parsear_hechos(crudo, dias)}
+    hechos = []
+    if del_usuario:
+        dias = {m["fecha"].date().isoformat() for m in del_usuario}
+        crudo = proveedor.responder(preparar_mensajes(del_usuario), [])
+        hechos = [
+            {"fecha": h["dia"], "descripcion": h["hecho"]} for h in parsear_hechos(crudo, dias)
+        ]
+    return {"generado_por_ia": True, "temas": [], "hechos": hechos, "patrones": []}
 
 
 def crear_resumidor() -> ProveedorLLM:
