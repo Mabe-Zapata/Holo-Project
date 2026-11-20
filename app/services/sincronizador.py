@@ -55,8 +55,11 @@ def sincronizar(motor: Engine, cola: ColaPendientes) -> int:
         try:
             with motor.begin() as conexion:
                 aplicar_evento(conexion, evento)
-        except SQLAlchemyError:
-            registro.warning("Base no disponible: la cola conserva sus eventos.")
+        except SQLAlchemyError as error:
+            registro.warning(
+                "No se pudo sincronizar (%s): la cola conserva sus eventos.",
+                type(error).__name__,
+            )
             return resueltos
         except Exception:
             # Un evento malformado no bloquea a los demás; queda en la cola para revisión.

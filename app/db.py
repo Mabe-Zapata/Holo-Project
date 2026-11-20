@@ -113,6 +113,9 @@ def crear_motor(url: str | None = None) -> Engine:
         url = obtener_configuracion().url_base_datos
 
     opciones: dict = {"pool_pre_ping": True, "hide_parameters": True}
+    if url.startswith("postgresql"):
+        # Con la base caída, la respuesta de crisis no espera el tiempo por defecto del driver.
+        opciones["connect_args"] = {"connect_timeout": 3}
     if url.startswith("sqlite"):
         opciones["connect_args"] = {"check_same_thread": False}
         if ":memory:" in url or url in ("sqlite://", "sqlite:///"):
