@@ -78,3 +78,71 @@ def test_tecnica_desconocida_falla():
 def test_paso_fuera_de_rango_falla(paso):
     with pytest.raises(ValueError):
         siguiente_paso("respiracion", paso=paso, confirmacion=True)
+
+
+@pytest.mark.parametrize("tecnica", ["", "Respiracion", "respiración", " anclaje "])
+def test_el_nombre_de_la_tecnica_debe_ser_exacto(tecnica):
+    with pytest.raises(ValueError):
+        siguiente_paso(tecnica, paso=0, confirmacion=True)
+
+
+@pytest.mark.parametrize("tecnica", ["respiracion", "anclaje"])
+def test_empezar_no_requiere_confirmacion(tecnica):
+    primero = siguiente_paso(tecnica, paso=0, confirmacion=True)
+
+    assert primero.texto == TECNICAS[tecnica][0]
+    assert primero.paso == 1
+
+
+@pytest.mark.parametrize("tecnica", ["respiracion", "anclaje"])
+def test_cada_paso_se_repite_hasta_que_el_usuario_confirma(tecnica):
+    textos = []
+    paso = 0
+    resultado = siguiente_paso(tecnica, paso=paso, confirmacion=False)
+    textos.append(resultado.texto)
+    paso = resultado.paso
+    while not resultado.terminada:
+        repetido = siguiente_paso(tecnica, paso=paso, confirmacion=False)
+        assert repetido.texto == textos[-1]
+        assert repetido.paso == paso
+        resultado = siguiente_paso(tecnica, paso=paso, confirmacion=True)
+        paso = resultado.paso
+        textos.append(resultado.texto)
+
+    assert textos[:-1] == list(TECNICAS[tecnica])
+
+
+@pytest.mark.parametrize("tecnica", ["respiracion", "anclaje"])
+def test_sin_confirmacion_en_el_ultimo_paso_no_termina_la_tecnica(tecnica):
+    ultimo = len(TECNICAS[tecnica])
+
+    resultado = siguiente_paso(tecnica, paso=ultimo, confirmacion=False)
+
+    assert not resultado.terminada
+    assert resultado.paso == ultimo
+    assert resultado.texto == TECNICAS[tecnica][-1]
+
+
+@pytest.mark.parametrize("tecnica", ["respiracion", "anclaje"])
+def test_una_vez_terminada_confirmar_de_nuevo_sigue_terminada(tecnica):
+    ultimo = len(TECNICAS[tecnica])
+
+    primero = siguiente_paso(tecnica, paso=ultimo, confirmacion=True)
+    segundo = siguiente_paso(tecnica, paso=primero.paso, confirmacion=True)
+
+    assert primero.terminada and segundo.terminada
+    assert segundo.paso == ultimo
+
+
+@pytest.mark.parametrize("tecnica", ["respiracion", "anclaje"])
+def test_los_pasos_son_textos_no_vacios_y_sin_repetidos(tecnica):
+    pasos = TECNICAS[tecnica]
+
+    assert all(p.strip() for p in pasos)
+    assert len(pasos) == len(set(pasos))
+
+
+@pytest.mark.parametrize("paso", [-1, 99])
+def test_paso_fuera_de_rango_tambien_falla_sin_confirmacion(paso):
+    with pytest.raises(ValueError):
+        siguiente_paso("anclaje", paso=paso, confirmacion=False)
