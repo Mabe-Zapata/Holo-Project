@@ -13,6 +13,7 @@ from app.services.almacen import CUENTAS_DEMO
 from app.services.cola import ColaPendientes
 from app.services.prompts import cargar_prompt_sistema
 from app.services.proveedor_llm import ProveedorDiferido, ProveedorLLM, crear_proveedor
+from app.services.resumen import crear_resumidor
 from app.services.riesgo import cargar_expresiones
 
 _motor_defecto: Engine | None = None
@@ -40,6 +41,11 @@ def obtener_conexion(motor: Engine = Depends(obtener_motor)) -> Generator[Connec
     with motor.connect() as conexion:
         yield conexion
         conexion.commit()
+
+
+def obtener_resumidor() -> ProveedorLLM:
+    # Se construye al pedir el resumen, no al arrancar: un error de configuración no tumba la API.
+    return ProveedorDiferido(crear_resumidor)
 
 
 @lru_cache

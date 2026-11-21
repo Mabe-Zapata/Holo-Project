@@ -63,9 +63,9 @@ def test_vista_del_tratante_solo_para_tratante(cliente):
     assert r.status_code == 403
 
 
-def test_resumen_pendiente(cliente):
-    r = cliente.post("/resumen", headers=cabecera("tratante"))
-    assert r.status_code == 501
+def test_resumen_solo_para_el_tratante(cliente):
+    r = cliente.post("/resumen", headers=cabecera("luis"))
+    assert r.status_code == 403
 
 
 def test_el_tratante_no_puede_consultar_el_historial_del_chat(cliente):

@@ -12,6 +12,25 @@ from app.services.cola import ColaPendientes
 # Expresión ficticia para probar la ruta de crisis sin usar frases reales.
 EXPRESION_DE_PRUEBA = "expresion de riesgo de prueba"
 
+# Material ficticio aprobado: hace que las pruebas del modelo tengan fragmentos pertinentes.
+TEXTO_DE_PRUEBA = {
+    "id": "P-01",
+    "titulo": "Material de prueba",
+    "tema": "prueba",
+    "modulo": "general",
+    "modo": "estandar",
+    "estado": "aprobado",
+    "fuente": "Texto ficticio para pruebas automáticas.",
+    "texto": "hola estresada dormir respirar conversacion mensaje pruebas material ayuda",
+}
+
+
+def sembrar_material(motor):
+    from app.repositorios.material import guardar_texto
+
+    with motor.begin() as conexion:
+        guardar_texto(conexion, TEXTO_DE_PRUEBA)
+
 
 def crear_motor_pruebas():
     motor_pruebas = create_engine(
@@ -52,6 +71,7 @@ def cliente(monkeypatch, tmp_path):
 
     try:
         with TestClient(app) as test_client:
+            sembrar_material(app.state.motor)
             yield test_client
     finally:
         app.dependency_overrides.clear()

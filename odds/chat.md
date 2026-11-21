@@ -91,3 +91,12 @@ Respuesta ante riesgo alto:
 - **Crisis sin consentimiento:** se muestran los recursos de ayuda, pero no se guarda nada.
 - **Mensaje normal con la base caída:** responde `500`. El cliente debe reintentar con el mismo `id_evento`.
 
+## Respuestas a partir del material
+
+- **Orden de revisión:** crisis, luego filtro clínico, luego búsqueda en el material y, solo si hay fragmentos pertinentes, el modelo.
+- **`fragmentos`** (en la respuesta): identificadores del material que usó el modelo. Vacío en las respuestas fijas.
+- **Consulta clínica** (diagnóstico o medicación): respuesta fija, sin modelo y sin fragmentos.
+- **Sin material pertinente:** respuesta fija que orienta hacia un profesional, sin modelo y sin fragmentos.
+- **Estado del material:** por defecto solo se usa el material `aprobado` (`HOLO_ESTADOS_MATERIAL=aprobado`). Los textos iniciales están `provisional`, así que hay que habilitarlos explícitamente para la demostración.
+- **Módulo de ansiedad:** solo llega a cuentas de paciente.
+

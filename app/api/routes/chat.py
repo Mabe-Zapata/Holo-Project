@@ -14,18 +14,27 @@ from app.api.deps import (
     obtener_motor,
     obtener_proveedor,
 )
+from app.core.config import obtener_configuracion
 from app.repositorios.alertas import registrar_alerta
 from app.repositorios.consentimiento import tiene_consentimiento
+from app.repositorios.material import listar_textos
 from app.repositorios.mensajes import buscar_mensaje_por_evento, guardar_mensaje, listar_mensajes
 from app.schemas.chat import MensajeEntrada, MensajeHistorial, MensajeSalida
 from app.services.almacen import ahora
 from app.services.cola import ColaPendientes
+from app.services.filtros import RESPUESTA_CLINICA, es_consulta_clinica
 from app.services.proveedor_llm import ProveedorLLM, ProveedorNoDisponible
+from app.services.recuperacion import buscar_fragmentos
 from app.services.riesgo import RECURSOS_AYUDA, TEXTO_CRISIS, es_riesgo_alto
 from app.services.sincronizador import SUFIJO_RESPUESTA
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 registro = logging.getLogger(__name__)
+
+RESPUESTA_SIN_MATERIAL = (
+    "No puedo ayudarte con eso a partir del material que tengo disponible. "
+    "Te recomiendo hablarlo con tu tratante o con un profesional de salud."
+)
 
 
 @router.post(
@@ -49,7 +58,8 @@ def enviar_mensaje(
         return MensajeSalida(
             tipo="crisis", texto=TEXTO_CRISIS, riesgo="alto", recursos=RECURSOS_AYUDA
         )
-    return _responder(motor, usuario["id"], entrada.texto, fecha, id_evento, proveedor)
+    modo = "paciente" if usuario["rol"] == "paciente" else "estandar"
+    return _responder(motor, usuario["id"], entrada.texto, fecha, id_evento, proveedor, modo)
 
 
 def _registrar_crisis(
@@ -102,6 +112,7 @@ def _responder(
     fecha: datetime,
     id_evento: str,
     proveedor: ProveedorLLM,
+    modo: str,
 ) -> MensajeSalida:
     with motor.connect() as conexion:
         if not tiene_consentimiento(conexion, usuario_id):
@@ -118,16 +129,9 @@ def _responder(
             guardar_mensaje(conexion, usuario_id, "usuario", "mensaje", texto, fecha, id_evento)
             conexion.commit()  # el mensaje queda guardado aunque el modelo no responda
 
-        fragmentos: list[tuple[str, str]] = []  # HU-08: búsqueda en el material aprobado.
-        try:
-            contenido = proveedor.responder(texto, fragmentos)
-        except ProveedorNoDisponible as error:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="El asistente no está disponible en este momento.",
-            ) from error
+        contenido, ids = _generar_respuesta(conexion, texto, modo, proveedor)
         salida = MensajeSalida(
-            tipo="respuesta", texto=contenido, riesgo="sin_riesgo", fragmentos=fragmentos
+            tipo="respuesta", texto=contenido, riesgo="sin_riesgo", fragmentos=ids
         )
         guardar_mensaje(
             conexion,
@@ -137,9 +141,32 @@ def _responder(
             salida.texto,
             ahora(),
             id_evento + SUFIJO_RESPUESTA,
+            fragmentos=ids,
         )
         conexion.commit()
         return salida
+
+
+def _generar_respuesta(
+    conexion: Connection, texto: str, modo: str, proveedor: ProveedorLLM
+) -> tuple[str, list[str]]:
+    """Filtro clínico, búsqueda en el material y, solo si hay fragmentos, el modelo (HU-08b)."""
+    if es_consulta_clinica(texto):
+        return RESPUESTA_CLINICA, []  # HU-10: el modelo no opina sobre diagnósticos
+    estados = tuple(
+        e.strip() for e in obtener_configuracion().estados_material.split(",") if e.strip()
+    )
+    fragmentos = buscar_fragmentos(texto, listar_textos(conexion, estados), modo)
+    if not fragmentos:
+        return RESPUESTA_SIN_MATERIAL, []  # sin material pertinente, no se llama al modelo
+    try:
+        contenido = proveedor.responder(texto, fragmentos)
+    except ProveedorNoDisponible as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="El asistente no está disponible en este momento.",
+        ) from error
+    return contenido, [id_ for id_, _ in fragmentos]
 
 
 def _respuesta_guardada(
@@ -152,7 +179,12 @@ def _respuesta_guardada(
         return MensajeSalida(
             tipo="crisis", texto=fila["texto"], riesgo="alto", recursos=RECURSOS_AYUDA
         )
-    return MensajeSalida(tipo="respuesta", texto=fila["texto"], riesgo="sin_riesgo")
+    return MensajeSalida(
+        tipo="respuesta",
+        texto=fila["texto"],
+        riesgo="sin_riesgo",
+        fragmentos=fila["fragmentos"] or [],
+    )
 
 
 @router.get(

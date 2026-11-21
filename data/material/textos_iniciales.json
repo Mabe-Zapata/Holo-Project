@@ -1,0 +1,72 @@
+[
+  {
+    "id": "M-01",
+    "titulo": "Respiración diafragmática",
+    "tema": "respiracion",
+    "modulo": "ansiedad",
+    "modo": "paciente",
+    "estado": "provisional",
+    "fuente": "Revisión sistemática sobre respiración controlada, PMC10741869: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10741869/",
+    "texto": "Para la respiración diafragmática, siéntate cómodamente y pon una mano en el pecho y otra en el abdomen. Inhala por la nariz procurando que se mueva sobre todo la mano del abdomen. Exhala despacio por la boca, más lento de lo que inhalaste. Repite unos minutos. Hay estudios que sugieren que esta respiración ayuda a reducir el estrés y la ansiedad, aunque la evidencia tiene limitaciones. Si el malestar persiste, habla con un profesional."
+  },
+  {
+    "id": "M-02",
+    "titulo": "Respiración para el estrés",
+    "tema": "respiracion",
+    "modulo": "ansiedad",
+    "modo": "paciente",
+    "estado": "provisional",
+    "fuente": "NHS, Breathing exercises for stress: https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/",
+    "texto": "Respira de forma suave y regular, sin forzar el aire ni llenar los pulmones al máximo. Puedes poner la atención en el ritmo de tu respiración, sin tratar de cambiarlo. Si sientes mareo, vuelve a respirar con normalidad. Esta práctica es una propuesta de autocuidado y no reemplaza la atención profesional."
+  },
+  {
+    "id": "M-03",
+    "titulo": "Anclaje al presente 5-4-3-2-1",
+    "tema": "anclaje",
+    "modulo": "ansiedad",
+    "modo": "paciente",
+    "estado": "provisional",
+    "fuente": "Referencia pendiente de verificar antes de publicar.",
+    "texto": "Para volver al presente, nombra despacio cinco cosas que puedes ver, cuatro que puedes tocar, tres que puedes oír, dos que puedes oler y una que puedes saborear. No juzgues lo que notas, solo obsérvalo. Todavía no hay una referencia verificada que respalde la eficacia de este ejercicio; úsalo como una propuesta de autocuidado."
+  },
+  {
+    "id": "M-04",
+    "titulo": "Escribir las preocupaciones",
+    "tema": "preocupacion",
+    "modulo": "ansiedad",
+    "modo": "paciente",
+    "estado": "provisional",
+    "fuente": "NHS, Every Mind Matters: https://www.nhs.uk/every-mind-matters/",
+    "texto": "Escribe en un papel lo que te preocupa. Después divide la hoja en dos: lo que puedes hacer hoy y lo que no depende de ti. Dedica tu atención solo a la primera columna. Si las preocupaciones se repiten y te limitan, habla con un profesional."
+  },
+  {
+    "id": "M-05",
+    "titulo": "Hábitos para dormir mejor",
+    "tema": "sueno",
+    "modulo": "sueno",
+    "modo": "estandar",
+    "estado": "provisional",
+    "fuente": "NHS, Every Mind Matters, sueño: https://www.nhs.uk/every-mind-matters/mental-health-issues/sleep/ y American Academy of Sleep Medicine (2021).",
+    "texto": "Acuéstate y levántate a horas parecidas, también los fines de semana. Crea una rutina tranquila antes de dormir y reduce las pantallas y la cafeína por la tarde. Si el problema para dormir dura semanas, consulta a un profesional de salud: en el insomnio prolongado suele funcionar mejor una terapia específica."
+  },
+  {
+    "id": "M-06",
+    "titulo": "Pausas durante el día",
+    "tema": "estres",
+    "modulo": "general",
+    "modo": "estandar",
+    "estado": "provisional",
+    "fuente": "OMS, Doing What Matters in Times of Stress (parafraseado; verificar el texto antes de publicar).",
+    "texto": "Haz pausas breves durante el día, aunque duren un minuto. Elige una actividad que te resulte agradable y dale un lugar en tu agenda. Los cambios pequeños y sostenidos suelen ayudar más que un cambio grande de golpe."
+  },
+  {
+    "id": "M-07",
+    "titulo": "Cuándo pedir ayuda",
+    "tema": "ayuda",
+    "modulo": "general",
+    "modo": "estandar",
+    "estado": "provisional",
+    "fuente": "Ministerio de Salud Pública del Ecuador, Línea 171 opción 6.",
+    "texto": "Si el malestar no mejora o se vuelve insoportable, busca apoyo profesional. Si estás en peligro o piensas en hacerte daño, llama al ECU 911. También puedes llamar a la línea 171, opción 6, del Ministerio de Salud Pública, para atención en crisis de salud mental."
+  }
+]

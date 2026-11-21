@@ -87,10 +87,38 @@ mensajes = Table(
     Column("creado_en", DateTime(timezone=True), nullable=False),
     # Identificador del evento: evita duplicados al reintentar (cola local y cliente).
     Column("id_evento", String(80), nullable=True),
+    # Identificadores de los fragmentos del material que usó la respuesta (HU-08b).
+    Column("fragmentos", JSON, nullable=True),
     UniqueConstraint("usuario_id", "id_evento", name="uq_mensaje_evento"),
 )
 
 Index("ix_mensajes_usuario_fecha", mensajes.c.usuario_id, mensajes.c.creado_en)
+
+# Material etiquetado que el asistente puede consultar (HU-07).
+material = Table(
+    "material",
+    metadata,
+    Column("id", String(40), primary_key=True),
+    Column("titulo", String(200), nullable=False),
+    Column("tema", String(60), nullable=False),
+    Column("modulo", String(20), nullable=False),
+    Column("modo", String(20), nullable=False),
+    Column("estado", String(20), nullable=False),
+    Column("fuente", Text, nullable=False),
+    Column("texto", Text, nullable=False),
+)
+
+# Resúmenes semanales generados para el tratante (HU-17b). Se guarda la respuesta completa.
+resumenes = Table(
+    "resumenes",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("paciente_id", String(50), ForeignKey("usuarios.id"), nullable=False),
+    Column("generado_en", DateTime(timezone=True), nullable=False),
+    Column("contenido", JSON, nullable=False),
+)
+
+Index("ix_resumenes_paciente_fecha", resumenes.c.paciente_id, resumenes.c.generado_en)
 
 alertas = Table(
     "alertas",
