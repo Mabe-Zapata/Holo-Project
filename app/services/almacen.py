@@ -18,11 +18,9 @@ CUENTAS_DEMO: dict[str, dict] = {
 @dataclass
 class Almacen:
     consentimientos: dict[str, datetime] = field(default_factory=dict)
-    alertas: dict[str, list[dict]] = field(default_factory=dict)
 
     def reiniciar(self) -> None:
         self.consentimientos.clear()
-        self.alertas.clear()
 
 
 almacen = Almacen()

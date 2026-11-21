@@ -89,6 +89,18 @@ mensajes = Table(
 
 Index("ix_mensajes_usuario_fecha", mensajes.c.usuario_id, mensajes.c.creado_en)
 
+alertas = Table(
+    "alertas",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("usuario_id", String(50), ForeignKey("usuarios.id"), nullable=False),
+    Column("nivel", String(20), nullable=False),
+    Column("mensaje", Text, nullable=False),
+    Column("creado_en", DateTime(timezone=True), nullable=False),
+)
+
+Index("ix_alertas_usuario_fecha", alertas.c.usuario_id, alertas.c.creado_en)
+
 
 def crear_motor(url: str | None = None) -> Engine:
     """Crea el motor de SQLAlchemy. Sin URL usa HOLO_URL_BASE_DATOS."""

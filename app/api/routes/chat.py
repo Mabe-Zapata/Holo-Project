@@ -7,10 +7,11 @@ from app.api.deps import (
     obtener_expresiones,
     obtener_proveedor,
 )
+from app.repositorios.alertas import registrar_alerta
 from app.repositorios.consentimiento import tiene_consentimiento
 from app.repositorios.mensajes import guardar_mensaje, listar_mensajes
 from app.schemas.chat import MensajeEntrada, MensajeHistorial, MensajeSalida
-from app.services.almacen import ahora, almacen
+from app.services.almacen import ahora
 from app.services.proveedor_llm import ProveedorLLM, ProveedorNoDisponible
 from app.services.riesgo import RECURSOS_AYUDA, TEXTO_CRISIS, es_riesgo_alto
 
@@ -42,9 +43,7 @@ def enviar_mensaje(
 
     # La revisión de riesgo ocurre siempre antes de consultar al modelo.
     if es_riesgo_alto(entrada.texto, expresiones):
-        almacen.alertas.setdefault(usuario["id"], []).append(
-            {"nivel": "alto", "mensaje": entrada.texto, "fecha": fecha}
-        )
+        registrar_alerta(conexion, usuario["id"], "alto", entrada.texto, fecha)
         salida = MensajeSalida(
             tipo="crisis", texto=TEXTO_CRISIS, riesgo="alto", recursos=RECURSOS_AYUDA
         )

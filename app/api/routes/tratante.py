@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.engine import Connection
 
-from app.api.deps import obtener_usuario
+from app.api.deps import obtener_conexion, obtener_usuario
+from app.repositorios.alertas import listar_alertas
+from app.repositorios.usuarios import buscar_usuario
+from app.repositorios.vinculos import buscar_paciente_vinculado
 from app.schemas.tratante import VistaPaciente
-from app.services.almacen import CUENTAS_DEMO, almacen
 
 router = APIRouter(prefix="/tratante", tags=["tratante"])
 
@@ -12,23 +15,28 @@ router = APIRouter(prefix="/tratante", tags=["tratante"])
     response_model=VistaPaciente,
     summary="Devuelve las alertas y el último resumen del paciente vinculado (RF-25, RF-30)",
 )
-def vista_paciente(usuario: dict = Depends(obtener_usuario)) -> VistaPaciente:
+def vista_paciente(
+    usuario: dict = Depends(obtener_usuario),
+    conexion: Connection = Depends(obtener_conexion),
+) -> VistaPaciente:
     if usuario["rol"] != "tratante":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Solo el tratante puede consultar esta vista.",
         )
-    # En el MVP hay un único paciente vinculado al tratante de demostración.
-    paciente_id = next(
-        (pid for pid, c in CUENTAS_DEMO.items() if c["tratante_id"] == usuario["id"]), None
-    )
+    # Solo el paciente con vínculo activo con este tratante; otro tratante recibe 403.
+    paciente_id = buscar_paciente_vinculado(conexion, usuario["id"])
     if paciente_id is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Sin pacientes vinculados."
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes un paciente vinculado.",
         )
+    paciente = buscar_usuario(conexion, paciente_id)
+    if paciente is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Paciente no encontrado.")
     return VistaPaciente(
         paciente_id=paciente_id,
-        nombre=CUENTAS_DEMO[paciente_id]["nombre"],
-        alertas=almacen.alertas.get(paciente_id, []),
+        nombre=paciente["nombre"],
+        alertas=listar_alertas(conexion, paciente_id),
         resumen=None,  # HU-17
     )
