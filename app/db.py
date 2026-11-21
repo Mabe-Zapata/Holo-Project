@@ -85,6 +85,9 @@ mensajes = Table(
     Column("tipo", String(20), nullable=False),
     Column("texto", Text, nullable=False),
     Column("creado_en", DateTime(timezone=True), nullable=False),
+    # Identificador del evento: evita duplicados al reintentar (cola local y cliente).
+    Column("id_evento", String(80), nullable=True),
+    UniqueConstraint("usuario_id", "id_evento", name="uq_mensaje_evento"),
 )
 
 Index("ix_mensajes_usuario_fecha", mensajes.c.usuario_id, mensajes.c.creado_en)
@@ -97,6 +100,8 @@ alertas = Table(
     Column("nivel", String(20), nullable=False),
     Column("mensaje", Text, nullable=False),
     Column("creado_en", DateTime(timezone=True), nullable=False),
+    Column("id_evento", String(80), nullable=True),
+    UniqueConstraint("usuario_id", "id_evento", name="uq_alerta_evento"),
 )
 
 Index("ix_alertas_usuario_fecha", alertas.c.usuario_id, alertas.c.creado_en)
@@ -108,6 +113,9 @@ def crear_motor(url: str | None = None) -> Engine:
         url = obtener_configuracion().url_base_datos
 
     opciones: dict = {"pool_pre_ping": True, "hide_parameters": True}
+    if url.startswith("postgresql"):
+        # Con la base caída, la respuesta de crisis no espera el tiempo por defecto del driver.
+        opciones["connect_args"] = {"connect_timeout": 3}
     if url.startswith("sqlite"):
         opciones["connect_args"] = {"check_same_thread": False}
         if ":memory:" in url or url in ("sqlite://", "sqlite:///"):

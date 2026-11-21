@@ -5,11 +5,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.deps import obtener_cola
 from app.api.routes import chat, consentimiento, resumen, salud, tratante
 from app.core.config import obtener_configuracion
 from app.core.logging import configurar_registros
 from app.db import crear_motor, crear_tablas
 from app.repositorios.usuarios import crear_cuentas_demo
+from app.services.sincronizador import Sincronizador
 
 
 @asynccontextmanager
@@ -21,7 +23,15 @@ async def ciclo_de_vida(app: FastAPI):
     # Crea las cuentas de demostración que falten (BE-02).
     with motor.begin() as conexion:
         crear_cuentas_demo(conexion)
+    # Pasa a la base los eventos de crisis que quedaron en la cola local (HU-16).
+    cfg = obtener_configuracion()
+    sincronizador = None
+    if cfg.sincronizar_automaticamente:
+        sincronizador = Sincronizador(motor, obtener_cola(), cfg.intervalo_sincronizacion_s)
+        sincronizador.iniciar()
     yield
+    if sincronizador is not None:
+        sincronizador.detener()
     motor.dispose()
 
 

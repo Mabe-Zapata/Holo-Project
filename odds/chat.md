@@ -83,3 +83,11 @@ Respuesta ante riesgo alto:
 - La restricción por rol ya está aplicada: la cuenta tratante recibe 403 en el chat y su historial.
 - El proveedor real (HU-09) es una API compatible con OpenAI configurada con `HOLO_PROVEEDOR_LLM=groq`, `HOLO_LLM_API_KEY`, `HOLO_LLM_MODELO` y `HOLO_LLM_URL_BASE`. El prompt del sistema (`data/prompts/prompt_sistema.md`) se envía en cada llamada.
 - La construcción del proveedor real se difiere hasta la respuesta normal: una configuración incompleta no impide rechazar una cuenta sin consentimiento ni devolver la respuesta de crisis y registrar su alerta. En una respuesta normal, la falta de configuración produce el mismo 503 genérico que un error del proveedor. Una respuesta del modelo debe ser una cadena no vacía; no se convierten objetos ni valores nulos en mensajes.
+
+## Reintentos y caídas de la base
+
+- **`id_evento`** (opcional, 8 a 64 caracteres `A-Z a-z 0-9 _ -`): identificador que el cliente asigna a cada mensaje. Reenviar el mismo `id_evento` no duplica el mensaje ni la alerta, y devuelve la misma respuesta sin llamar al modelo. Sin `id_evento`, el servidor asigna uno propio.
+- **Crisis con la base caída:** la respuesta de crisis (`tipo: "crisis"`) se entrega igual. El evento queda en una cola local y se guarda en la base cuando vuelve. El tratante ve esas alertas en `alertas_pendientes` de `GET /tratante/paciente`.
+- **Crisis sin consentimiento:** se muestran los recursos de ayuda, pero no se guarda nada.
+- **Mensaje normal con la base caída:** responde `500`. El cliente debe reintentar con el mismo `id_evento`.
+

@@ -19,6 +19,7 @@ def registrar_alerta(
     nivel: str,
     mensaje: str,
     creado_en: datetime,
+    id_evento: str | None = None,
 ) -> None:
     """Guarda una situación de riesgo. Rechaza niveles desconocidos y mensajes vacíos."""
     if nivel not in NIVELES:
@@ -27,7 +28,11 @@ def registrar_alerta(
         raise ValueError("La alerta necesita el mensaje que la originó.")
     conexion.execute(
         insert(alertas).values(
-            usuario_id=usuario_id, nivel=nivel, mensaje=mensaje, creado_en=creado_en
+            usuario_id=usuario_id,
+            nivel=nivel,
+            mensaje=mensaje,
+            creado_en=creado_en,
+            id_evento=id_evento,
         )
     )
 

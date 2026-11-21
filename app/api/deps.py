@@ -10,6 +10,7 @@ from app.core.config import obtener_configuracion
 from app.db import crear_motor, crear_tablas
 from app.repositorios.usuarios import crear_cuentas_demo
 from app.services.almacen import CUENTAS_DEMO
+from app.services.cola import ColaPendientes
 from app.services.prompts import cargar_prompt_sistema
 from app.services.proveedor_llm import ProveedorDiferido, ProveedorLLM, crear_proveedor
 from app.services.riesgo import cargar_expresiones
@@ -27,15 +28,23 @@ def _obtener_motor_por_defecto() -> Engine:
     return _motor_defecto
 
 
-def obtener_conexion(request: Request) -> Generator[Connection, None, None]:
+def obtener_motor(request: Request) -> Engine:
     motor = getattr(request.app.state, "motor", None)
     if motor is None:
         motor = _obtener_motor_por_defecto()
+    return motor
 
+
+def obtener_conexion(motor: Engine = Depends(obtener_motor)) -> Generator[Connection, None, None]:
     # Las rutas pueden confirmar antes (chat guarda el mensaje del usuario aunque el modelo falle).
     with motor.connect() as conexion:
         yield conexion
         conexion.commit()
+
+
+@lru_cache
+def obtener_cola() -> ColaPendientes:
+    return ColaPendientes(obtener_configuracion().ruta_cola_pendientes)
 
 
 def obtener_usuario(

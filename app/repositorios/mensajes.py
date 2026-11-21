@@ -2,7 +2,6 @@
 
 Guarda y lista los mensajes de cada usuario. Como el resto de los repositorios, cada función
 recibe la conexión y la transacción la abre quien llama, por ejemplo con `motor.begin()`.
-Este componente no conecta todavía las rutas de chat e historial a la base de datos.
 """
 
 from datetime import datetime, timezone
@@ -20,11 +19,13 @@ def guardar_mensaje(
     tipo: str,
     texto: str,
     fecha: datetime | None = None,
+    id_evento: str | None = None,
 ) -> None:
     """Guarda un mensaje con fecha normalizada a UTC.
 
     Sin fecha usa la hora actual. Una fecha sin zona se interpreta como UTC,
-    sin consultar la zona del equipo que ejecuta la aplicación.
+    sin consultar la zona del equipo que ejecuta la aplicación. Con `id_evento`, un
+    segundo mensaje con el mismo identificador para la misma cuenta se rechaza.
     """
     fecha_utc = fecha if fecha is not None else datetime.now(timezone.utc)
     if fecha_utc.utcoffset() is None:
@@ -39,8 +40,23 @@ def guardar_mensaje(
             tipo=tipo,
             texto=texto,
             creado_en=fecha_utc,
+            id_evento=id_evento,
         )
     )
+
+
+def buscar_mensaje_por_evento(conexion: Connection, usuario_id: str, id_evento: str) -> dict | None:
+    """Devuelve el mensaje guardado con ese identificador de evento, o None."""
+    fila = (
+        conexion.execute(
+            select(mensajes.c.autor, mensajes.c.tipo, mensajes.c.texto).where(
+                mensajes.c.usuario_id == usuario_id, mensajes.c.id_evento == id_evento
+            )
+        )
+        .mappings()
+        .first()
+    )
+    return dict(fila) if fila is not None else None
 
 
 def listar_mensajes(conexion: Connection, usuario_id: str) -> list[dict]:

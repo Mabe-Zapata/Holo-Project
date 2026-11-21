@@ -9,6 +9,8 @@ LIMITE_TEXTO = 2000
 
 class MensajeEntrada(BaseModel):
     texto: str = Field(min_length=1, max_length=LIMITE_TEXTO)
+    # Identificador que el cliente pone a cada mensaje: reintentar con el mismo id no duplica.
+    id_evento: str | None = Field(default=None, pattern=r"^[A-Za-z0-9_-]{8,64}$")
 
     @field_validator("texto", mode="before")
     @classmethod
