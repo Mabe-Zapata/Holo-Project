@@ -2,7 +2,7 @@
 
 Devuelve los mensajes anteriores de la cuenta, en orden cronológico.
 
-- **Estado:** Operativo (almacenamiento en memoria)
+- **Estado:** Operativo (persistido en la base de datos)
 - **Requerimientos:** RF-07
 - **Historias:** HU-05, HU-06
 - **Roles permitidos:** usuario_estandar, paciente
@@ -42,4 +42,4 @@ Código `200`. Lista de mensajes; vacía si la cuenta no ha conversado.
 ## Notas
 
 - Cada cuenta solo accede a su propio historial. El tratante no puede consultar la conversación de su paciente (regla RN-06).
-- Pendiente (HU-06): persistencia en SQLite. Actualmente el historial se pierde al reiniciar el servidor.
+- Los mensajes se conservan al reiniciar el servidor (HU-06).

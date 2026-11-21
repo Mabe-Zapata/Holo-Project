@@ -32,8 +32,10 @@ def obtener_conexion(request: Request) -> Generator[Connection, None, None]:
     if motor is None:
         motor = _obtener_motor_por_defecto()
 
-    with motor.begin() as conexion:
+    # Las rutas pueden confirmar antes (chat guarda el mensaje del usuario aunque el modelo falle).
+    with motor.connect() as conexion:
         yield conexion
+        conexion.commit()
 
 
 def obtener_usuario(
