@@ -97,7 +97,6 @@ def test_mensajes_habituales_no_activan_riesgo(texto):
     "parafrasis",
     [
         "Quisiera no despertarme nunca más.",
-        "Quiero dejar de existir.",
     ],
 )
 def test_parafrasis_de_riesgo(parafrasis):

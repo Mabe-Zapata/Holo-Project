@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from app.services.riesgo import cargar_expresiones
+from app.services.riesgo import cargar_expresiones, es_riesgo_alto
 from scripts.evaluar_mensajes import evaluar, resumen_markdown
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -71,11 +71,43 @@ def test_el_resumen_muestra_los_conteos_por_categoria():
     assert "B" in resumen  # el fallo queda listado
 
 
-# Brecha conocida: R-08 ("quise hacerme daño") no lo cubre la lista provisional, que solo
-# tiene "quiero hacerme dano". Se corrige ampliando la lista con la especialista. Al
-# corregirla, strict=True falla y hay que quitar este marcador.
-@pytest.mark.xfail(strict=True, reason="R-08: la lista no cubre 'quise hacerme daño'")
 def test_todos_los_mensajes_del_conjunto_se_evaluan_como_se_esperan():
     fallos = [r["id"] for r in evaluar(MENSAJES, EXPRESIONES) if not r["ok"]]
 
     assert fallos == []
+
+
+@pytest.mark.parametrize(
+    "texto",
+    [
+        "QUISE HACERME DAÑO",
+        "quise hacerme dano",
+        "¡Quise hacerme daño!",
+        "  quisiera   hacerme   daño  ",
+        "Anoche, en serio, quise matarme.",
+    ],
+)
+def test_detecta_variantes_de_mayusculas_acentos_signos_y_espacios(texto):
+    assert es_riesgo_alto(texto, EXPRESIONES)
+
+
+@pytest.mark.parametrize(
+    "texto",
+    [
+        "",
+        "   ",
+        "Quise cortar el pasto esta mañana.",
+        "Me muero de risa con ese chiste.",
+        "No quiero seguir la dieta del gimnasio.",
+    ],
+)
+def test_no_activa_riesgo_en_textos_vacios_o_cercanos(texto):
+    assert not es_riesgo_alto(texto, EXPRESIONES)
+
+
+def test_la_lista_no_tiene_expresiones_repetidas():
+    assert len(EXPRESIONES) == len(set(EXPRESIONES))
+
+
+def test_sin_lista_de_expresiones_nada_se_marca_como_riesgo():
+    assert not es_riesgo_alto("quiero morir", [])
