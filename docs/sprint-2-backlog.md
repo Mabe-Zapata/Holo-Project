@@ -58,7 +58,7 @@ Los puntos y responsables vienen del plan original. El estado se verificó contr
 | BE-08 | Jose | E | Prueba que falla si `odds/openapi.json` está desactualizado | 1 | Sin empezar. Existe `scripts/exportar_openapi.py` | Ninguna |
 | FE-13 | Justin | F | Recorrido contra el backend real, con diferencias registradas en `odds/` | 2 | Sin empezar | HU-08b, HU-17b |
 | BE-19 | Justin | F | Revisión de seguridad básica, en `docs/seguridad.md` | 2 | Sin empezar | Ninguna |
-| BE-17 | Imanol | F | Prueba de extremo a extremo: consentimiento, mensaje, crisis, alerta y resumen | 2 | Sin empezar | HU-08b, HU-17b |
+| BE-17 | Imanol | F | Prueba de extremo a extremo: consentimiento, mensaje, crisis, alerta y resumen | 2 | En revisión: `tests/test_flujo_completo.py` | HU-08b, HU-17b |
 | HU-22 | Karol | F | Guion de la demostración, presentación y grabación de respaldo | 3 | Sin empezar | Todo lo anterior para el ensayo final |
 
 Total del sprint: 48 pts (Erick 12, María Belén 14, parejas 22).
