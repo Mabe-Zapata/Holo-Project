@@ -43,7 +43,7 @@ Los puntos y responsables vienen del plan original. El estado se verificó contr
 | HU-11 | Relajación paso a paso, respiración y anclaje | 3 | Sin empezar | Ninguna |
 | HU-12 | Contenido del módulo de ansiedad solo para cuentas de paciente | 3 | Sin empezar | HU-07 |
 | HU-17b | `POST /resumen` guarda el último resumen (solo tratante vinculado) | 3 | Sin empezar | HU-17a |
-| HU-21 | Conjunto de mensajes de prueba y script de evaluación | 3 | Sin empezar | Ninguna |
+| HU-21 | Conjunto de mensajes de prueba y script de evaluación | 3 | En revisión: #26 (bloqueado por aprobación de la especialista) | Ninguna |
 
 ### Parejas (22 pts)
 

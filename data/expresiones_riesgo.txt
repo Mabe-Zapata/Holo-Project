@@ -19,3 +19,27 @@ quiero lastimarme
 me quiero cortar
 tomar todas las pastillas
 no le encuentro sentido a vivir
+# Ampliación (HU-21): variantes en pasado, condicional e infinitivo que la lista inicial no cubría.
+# Pendiente de revisión de la especialista.
+quise hacerme dano
+quisiera hacerme dano
+queria hacerme dano
+me quise hacer dano
+quise lastimarme
+me quise lastimar
+quise quitarme la vida
+quisiera quitarme la vida
+me quise matar
+quise matarme
+me quise cortar
+quise suicidarme
+pienso en suicidarme
+pensamientos suicidas
+no quiero seguir viviendo
+ya no quiero vivir
+ya no quiero existir
+quiero dejar de existir
+quiero no existir
+no quiero despertar
+prefiero estar muerta
+prefiero estar muerto

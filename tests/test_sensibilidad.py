@@ -91,13 +91,16 @@ def test_mensajes_habituales_no_activan_riesgo(texto):
 
 @pytest.mark.xfail(
     strict=True,
-    reason="Límite conocido: la lista exige la expresión exacta; las paráfrasis se escapan.",
+    reason=(
+        "Brecha documentada en docs/analisis-brecha-parafrasis.md: la lista exige la "
+        "expresión exacta y esta paráfrasis no coincide. Pendiente de la especialista; "
+        "no implica gravedad equivalente a las frases de la lista."
+    ),
 )
 @pytest.mark.parametrize(
     "parafrasis",
     [
         "Quisiera no despertarme nunca más.",
-        "Quiero dejar de existir.",
     ],
 )
 def test_parafrasis_de_riesgo(parafrasis):
