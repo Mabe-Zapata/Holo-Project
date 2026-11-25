@@ -103,6 +103,14 @@ def test_el_archivo_inicial_cumple_las_reglas_de_la_historia():
     assert all(t["modo"] == "paciente" for t in textos if t["modulo"] == "ansiedad")
 
 
+def test_el_archivo_inicial_tiene_al_menos_tres_textos_de_ansiedad_solo_para_paciente():
+    textos = json.loads(ARCHIVO_INICIAL.read_text(encoding="utf-8"))
+    ansiedad = [t for t in textos if t["modulo"] == "ansiedad"]
+
+    assert len(ansiedad) >= 3
+    assert all(t["modo"] == "paciente" for t in ansiedad)
+
+
 def test_cargar_el_archivo_inicial_guarda_los_textos(motor):
     cantidad = cargar_desde_archivo(motor, ARCHIVO_INICIAL)
 
