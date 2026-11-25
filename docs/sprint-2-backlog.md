@@ -40,13 +40,8 @@ Los puntos y responsables vienen del plan original. El estado se verificó contr
 | ID | Tarea | Pts | Estado | Depende de |
 | --- | --- | --- | --- | --- |
 | HU-16 | Alertas guardadas y visibles solo al tratante vinculado | 2 | En revisión: #20 y #21 | BE-04 (#19) |
-<<<<<<< HEAD
-| HU-11 | Relajación paso a paso, respiración y anclaje | 3 | Sin empezar | Ninguna |
-| HU-12 | Contenido del módulo de ansiedad solo para cuentas de paciente | 3 | Hecho en #25; material pendiente de revisión de la especialista | HU-07 |
-=======
 | HU-11 | Relajación paso a paso, respiración y anclaje | 3 | Servicio hecho en #24; integración con el chat pendiente (con Erick) | Ninguna |
-| HU-12 | Contenido del módulo de ansiedad solo para cuentas de paciente | 3 | Sin empezar | HU-07 |
->>>>>>> origin/develop
+| HU-12 | Contenido del módulo de ansiedad solo para cuentas de paciente | 3 | Hecho en #25; material pendiente de revisión de la especialista | HU-07 |
 | HU-17b | `POST /resumen` guarda el último resumen (solo tratante vinculado) | 3 | Sin empezar | HU-17a |
 | HU-21 | Conjunto de mensajes de prueba y script de evaluación | 3 | Sin empezar | Ninguna |
 
